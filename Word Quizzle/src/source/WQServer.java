@@ -13,8 +13,8 @@ public class WQServer {
 			RegisterImpl register = new RegisterImpl();
 			RegisterInterface stub = (RegisterInterface) UnicastRemoteObject.exportObject(register, 0);
 
-			LocateRegistry.createRegistry(30000);
-			Registry r = LocateRegistry.getRegistry(30000);
+			LocateRegistry.createRegistry(15000);
+			Registry r = LocateRegistry.getRegistry(15000);
 
 			r.rebind("REGISTER-SERVER", stub);
 
