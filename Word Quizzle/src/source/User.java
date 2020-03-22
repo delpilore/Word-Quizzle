@@ -4,6 +4,7 @@ public class User {
 	
 	private String username;
 	private String password;
+	private Boolean OnlineState=false;
 
 	public User(String _username, String _password) {
 		setUsername(_username);
@@ -29,6 +30,14 @@ public class User {
 
 	public String getPassword() {
 		return password;
+	}
+	
+	public void setOnlineState(Boolean _value) { 
+		OnlineState = _value;
+	}
+	
+	public boolean getOnlineState() {
+		return OnlineState;
 	}
 
 }
