@@ -1,5 +1,10 @@
 package source;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -13,10 +18,19 @@ public class WQClient {
 		
 		Remote remoteObject;
 		RegisterInterface serverObject;
+		Request request;
+		Response response;
 		
 		Scanner input = new Scanner(System.in);
 		String command;
 		Boolean on = true;
+		
+		Socket socket = null;
+		String hostname = "localhost"; 
+		int myTCPPort = 16000;
+		int myRMIPort = 15000;
+		
+        String usr, pass;
 		
 		System.out.print("Benvenuto/a in World Quizzle!\n");
         
@@ -38,14 +52,13 @@ public class WQClient {
 	        switch (command) {
 		        case "R":
 		        case "r":
-		            String usr, pass;
 		            System.out.print("Nome utente: ");
 		            usr = input.next();
 		            System.out.print("Password: ");
 		            pass = input.next();
 		            
 		    		try {
-		    			Registry r = LocateRegistry.getRegistry(15000);
+		    			Registry r = LocateRegistry.getRegistry(myRMIPort);
 		    			remoteObject = r.lookup("REGISTER-SERVER");
 		    			serverObject = (RegisterInterface) remoteObject;
 		    			
@@ -64,6 +77,66 @@ public class WQClient {
 		    		}
 		            
 				break;
+				
+		        case "L":
+		        case "l":
+		            System.out.print("Nome utente: ");
+		            usr = input.next();
+		            System.out.print("Password: ");
+		            pass = input.next();
+		            
+		            request = new Request(usr, pass, "L");
+		            
+		        	try { 
+		        		socket = new Socket(hostname, myTCPPort);
+		        		
+		        		ObjectOutputStream writer = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+		        		writer.writeObject(request);
+		        		writer.flush();
+		        		
+		        		ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+
+		        		response = (Response) reader.readObject();
+		        		
+		        		reader.close(); 
+		        		writer.close(); 
+		        		
+		        		System.out.print("Risposta alla richiesta: " + response.getResponse());
+		        	}
+		        	catch (Exception e) {
+		        		e.printStackTrace(); 
+		        	}
+		        	
+		        break;
+		        
+		        case "Lo":
+		        case "lo":
+		            System.out.print("Nome utente: ");
+		            usr = input.next();
+		            
+		            request = new Request(usr, null, "Lo");
+		            
+		        	try { 
+		        		socket = new Socket(hostname, myTCPPort);
+		        		
+		        		ObjectOutputStream writer = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+		        		writer.writeObject(request);
+		        		writer.flush();
+		        		
+		        		ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+
+		        		response = (Response) reader.readObject();
+		        		
+		        		reader.close(); 
+		        		writer.close(); 
+		        		
+		        		System.out.print("Risposta alla richiesta: " + response.getResponse());
+		        	}
+		        	catch (Exception e) {
+		        		e.printStackTrace(); 
+		        	}
+		        	
+		        break;
 				
 		        case "X":
 		        case "x":
