@@ -1,39 +1,53 @@
 package source;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class WQServer {
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		
-		Structures support = new Structures();
+		Structures WordQuizzleUsers = new Structures();
+		
+		int NWORKERS = 2;
+		int myTCPPort = 16000;
+		int myRMIPort = 15000;
+		RegisterImpl register = null;
 		
 		try {
-			RegisterImpl register = new RegisterImpl(support);
+			register = new RegisterImpl(WordQuizzleUsers);
 			RegisterInterface stub = (RegisterInterface) UnicastRemoteObject.exportObject(register, 0);
 
-			LocateRegistry.createRegistry(15000);
-			Registry r = LocateRegistry.getRegistry(15000);
+			LocateRegistry.createRegistry(myRMIPort);
+			Registry r = LocateRegistry.getRegistry(myRMIPort);
 
-			r.rebind("REGISTER-SERVER", stub);
-
-			System.out.println("Server ready");
-			
-			/* Stop dell'input JSON */
-			Scanner input = new Scanner(System.in);
-			String command;
-			command = input.next();
-			if(command.equals("stop"))
-				register.stopJSON();
-			input.close();
-			
+			r.rebind("REGISTER-SERVER", stub);	
 		}
 		catch(RemoteException e){
 			e.printStackTrace();
+		}
+		
+		ServerSocket server = null;
+		ExecutorService threadPool = Executors.newFixedThreadPool(NWORKERS);
+		
+		try {
+			server = new ServerSocket(myTCPPort);
+			System.out.println("Web server waiting for request on port " + myTCPPort);
+
+			while(true) {
+				Socket client = server.accept();
+				threadPool.execute(new RequestHandler(client, WordQuizzleUsers));
+			}	
+		}
+		catch (IOException e) {
+			threadPool.shutdown();
 		}
 	}
 }
