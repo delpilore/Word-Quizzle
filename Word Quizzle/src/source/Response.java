@@ -8,7 +8,7 @@ public class Response implements Serializable {
 	
 	private StatusCodes statusCode;
 	
-	public Response(String _response, StatusCodes _statusCode) {
+	public Response(StatusCodes _statusCode) {
 		statusCode = _statusCode;
 	}
 	
