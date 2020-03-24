@@ -40,25 +40,25 @@ public class RequestHandler implements Runnable {
 				
 				String usr = request.getRequestUsername();
 				String pass = request.getRequestPassword();
-				//String message = request.getRequestMessage();
+				String message = request.getRequestMessage();
 	
 				switch (request.getRequestCommand()) {
 					case LOGIN:
 						
 						if (!WordQuizzleUsers.containsUser(usr)) {
-							response = new Response ("Non sei registrato!", StatusCodes.USERNOTREGISTERED);
+							response = new Response (StatusCodes.USERNOTREGISTERED);
 							Utility.write(client,response);
 			        		client.close();
 						}
 						
 						else if (!pass.equals(WordQuizzleUsers.getUser(usr).getPassword())) {
-							response = new Response ("Password sbagliata!", StatusCodes.WRONGPASSWORD);
+							response = new Response (StatusCodes.WRONGPASSWORD);
 							Utility.write(client,response);
 			        		client.close();
 						}
 						
 						else {
-							response = new Response ("Da ora sei loggato!", StatusCodes.OK);
+							response = new Response (StatusCodes.OK);
 							WordQuizzleUsers.getUser(usr).setOnlineState(true); // qua potrei anche aggiornare il file JSON ma mi sembra ragionevole che se il server si ferma mentre l'utente era online																// al riavvio risulti offline.
 							Utility.write(client,response);
 							
@@ -66,18 +66,58 @@ public class RequestHandler implements Runnable {
 								requestQueue.add(client);
 								requestQueue.notify();
 							}
+							
+							WordQuizzleUsers.writeJson();
 						}
 					
 		        	break;
 		        	
 					case LOGOUT:
 	
-						response = new Response ("Da ora non sei più loggato!", StatusCodes.OK);
+						response = new Response (StatusCodes.OK);
 						WordQuizzleUsers.getUser(usr).setOnlineState(false);
 						Utility.write(client,response);
 		        		
 		        		client.close();
 		        		
+		        		WordQuizzleUsers.writeJson();
+		        		
+		        	break;
+		        	
+					case ADDFRIEND:
+						
+						if (!WordQuizzleUsers.containsUser(message)) {
+							response = new Response (StatusCodes.WRONGFRIENDREQUEST);
+							Utility.write(client,response);
+						}
+						else if (WordQuizzleUsers.getUser(usr).isFriend(message)){
+							response = new Response (StatusCodes.ALREADYFRIENDS);
+							Utility.write(client,response);
+						}
+						else {
+							response = new Response (StatusCodes.OK);
+							WordQuizzleUsers.getUser(usr).addFriend(message);
+							WordQuizzleUsers.getUser(message).addFriend(usr);
+
+							Utility.write(client,response);
+							
+							WordQuizzleUsers.writeJson();
+						}
+						
+						synchronized(requestQueue) {
+							requestQueue.add(client);
+							requestQueue.notify();
+						}
+		        	break;
+		        	
+					case FRIENDLIST:
+						
+						Utility.write(client,WordQuizzleUsers.getUser(usr).getFriendList());
+						
+						synchronized(requestQueue) {
+							requestQueue.add(client);
+							requestQueue.notify();
+						}
 		        	break;
 		        	
 				default:

@@ -4,6 +4,8 @@ import java.net.Socket;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import source.RegisterInterface.UserAlreadyRegisteredException;
@@ -142,6 +144,49 @@ public class WQClient {
 			        		        		System.out.print(response.getStatusCode() + ": " + response.getStatusCode().label +"\n");
 			        		        		if (response.getStatusCode() == StatusCodes.OK)
 			        		        			logged = false;		
+			        		        	}
+			        		        	catch(Exception e) {
+			        		        		e.printStackTrace();
+			        		        	}
+			        		        break;
+			        		        
+			        		        case "A":
+			        		        case "a":
+			        		        	
+			        		        	System.out.print("Nome utente della persona che vuoi aggiungere come amico: ");
+			        		        	String friend = input.next();
+			        		        	request = new Request(usr, null, Operations.ADDFRIEND, friend);
+			        		        
+			        		        	try {
+			        		        		
+				        		            Utility.write(socket,request);
+			        		        		response = (Response) Utility.read(socket);
+		
+			        		        		System.out.print(response.getStatusCode() + ": " + response.getStatusCode().label +"\n");
+			        		        		
+			        		        	}
+			        		        	catch(Exception e) {
+			        		        		e.printStackTrace();
+			        		        	}
+			        		        break;
+			        		        
+			        		        case "La":
+			        		        case "la":
+			        		        	
+			        		        	request = new Request(usr, null, Operations.FRIENDLIST, null);
+			        		        
+			        		        	try {
+			        		        		
+				        		            Utility.write(socket,request);
+
+											ArrayList<?> friends = (ArrayList<?>) Utility.read(socket);
+		
+			        		        		if(friends.isEmpty())
+			        		        			System.out.print("La tua lista amici è attualmente vuota!\n");
+			        		        		else {
+			        		        			System.out.print("Ecco la tua lista amici:\n");
+			        		        			System.out.print(Arrays.toString(friends.toArray()) + "\n");
+			        		        		}
 			        		        	}
 			        		        	catch(Exception e) {
 			        		        		e.printStackTrace();
