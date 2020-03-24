@@ -4,21 +4,38 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Hashtable;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class Structures {
+//AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
-	private Hashtable<String, User> WordQuizzleUsers;  // Mappa il nome utente di un utente registrato al suo oggetto User, contentente altre informazioni (per ora solo password)
+/*
+ * STRUCTURES (oggetto istanziato una sola volta in "WQServer" e condiviso tra tutti i thread del Server)
+ * 
+ * Questa classe contiene tutte le strutture utili al funzionamento del Server.
+ * 
+ */
+public class Structures {
+	
+	// Mappa il nome utente di un utente registrato, al suo oggetto User, contentente altre informazioni (vedere "User")
+	private Hashtable<String, User> WordQuizzleUsers;  
+	// File JSON dove verrà salvata la HashTable sopra (per mantenere persistente lo stato del server)
 	private File json_file;
 	
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
+	// Coda di socket accettati dal Listener o attualmente loggati al servizio (quindi con socket aperta lato server)
+	private LinkedBlockingQueue<Socket> activeRequests;
+	
+	// Costruttore
 	public Structures() {
 		WordQuizzleUsers = new Hashtable<String,User>();
 		json_file = new File("WordQuizzleUsers.json");
+		activeRequests = new LinkedBlockingQueue<Socket>();
 		
 		if(json_file.isFile()) {
 			System.out.println("Il file JSON esiste già, recupero tutti gli utenti dal file\n");
@@ -62,4 +79,12 @@ public class Structures {
 		return WordQuizzleUsers.get(_user);
 	}
 	
+
+	public LinkedBlockingQueue<Socket> getRequestsQueue() {
+		return activeRequests;
+	}
+
+	public void setRequests(LinkedBlockingQueue<Socket> requests) {
+		activeRequests = requests;
+	}
 }
