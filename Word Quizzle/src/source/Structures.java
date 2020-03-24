@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
@@ -26,7 +27,7 @@ public class Structures {
 	// File JSON dove verrà salvata la HashTable sopra (per mantenere persistente lo stato del server)
 	private File json_file;
 	
-	private ObjectMapper objectMapper = new ObjectMapper();
+	private ObjectMapper objectMapper;
 	
 	// Coda di socket accettati dal Listener o attualmente loggati al servizio (quindi con socket aperta lato server)
 	private LinkedBlockingQueue<Socket> activeRequests;
@@ -36,6 +37,9 @@ public class Structures {
 		WordQuizzleUsers = new Hashtable<String,User>();
 		json_file = new File("WordQuizzleUsers.json");
 		activeRequests = new LinkedBlockingQueue<Socket>();
+		objectMapper = new ObjectMapper();
+		
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 		
 		if(json_file.isFile()) {
 			System.out.println("Il file JSON esiste già, recupero tutti gli utenti dal file\n");
