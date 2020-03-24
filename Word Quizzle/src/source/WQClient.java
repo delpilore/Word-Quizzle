@@ -4,11 +4,13 @@ import java.net.Socket;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import source.RegisterInterface.UserAlreadyRegisteredException;
+import source.RegisterInterface.UsernameTooShortException;
+import source.RegisterInterface.WeakPasswordException;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
@@ -74,11 +76,14 @@ public class WQClient {
 		    		catch(UserAlreadyRegisteredException e) {
 		    			System.out.print("Questo username è stato già preso!\n");
 		    		}
-		    		catch(NullPointerException e) {
-		    			System.out.print("Non hai inserito uno o entrambi gli argomenti!\n");
+		    		catch(WeakPasswordException e) {
+		    			System.out.print("Password troppo corta! Deve essere almeno di 4 caratteri!\n");
+		    		}
+		    		catch(UsernameTooShortException e) {
+		    			System.out.print("Nome utente troppo corto! Deve essere almeno di 3 caratteri!\n");
 		    		}
 		    		catch(Exception e) {
-		    			System.out.print("Qualcosa è andato storto.. riprova!\n");
+		    			System.out.print("Qualcosa è andato storto..\n");
 		    		}
 		            
 				break;
@@ -178,15 +183,16 @@ public class WQClient {
 			        		        	try {
 			        		        		
 				        		            Utility.write(socket,request);
+				        		            
+				        		            JsonNode json = (JsonNode) Utility.read(socket);
 
-											ArrayList<?> friends = (ArrayList<?>) Utility.read(socket);
-		
-			        		        		if(friends.isEmpty())
-			        		        			System.out.print("La tua lista amici è attualmente vuota!\n");
-			        		        		else {
-			        		        			System.out.print("Ecco la tua lista amici:\n");
-			        		        			System.out.print(Arrays.toString(friends.toArray()) + "\n");
-			        		        		}
+		        		        			System.out.print("Ecco la tua lista amici:\n");
+		        		        			if (json.isArray()) {
+		        		        			    for (final JsonNode objNode : json) {
+		        		        			        System.out.println("\t- " + objNode);
+		        		        			    }
+		        		        			}
+			        		        		
 			        		        	}
 			        		        	catch(Exception e) {
 			        		        		e.printStackTrace();

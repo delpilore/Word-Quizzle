@@ -3,6 +3,9 @@ package source;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class RequestHandler implements Runnable {
 	
 	private Socket client;
@@ -112,7 +115,10 @@ public class RequestHandler implements Runnable {
 		        	
 					case FRIENDLIST:
 						
-						Utility.write(client,WordQuizzleUsers.getUser(usr).getFriendList());
+						ObjectMapper mapper = new ObjectMapper();
+						JsonNode array = mapper.valueToTree(WordQuizzleUsers.getUser(usr).getFriendList());
+						
+						Utility.write(client,array);
 						
 						synchronized(requestQueue) {
 							requestQueue.add(client);
