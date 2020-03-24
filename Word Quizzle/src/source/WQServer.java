@@ -1,28 +1,37 @@
 package source;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
+//AUTHOR: Lorenzo Del Prete, Corso B, 531417
+
+/*
+ * WQSERVER 
+ * 
+ * WQServer altro non è che il core del Server. 
+ * Si occupa di:
+ *  - Istanziare un singolo oggetto "Structures", che sarà poi condiviso tra tutti i Thread del Server.
+ * 	- Esportare l'oggetto che realizzerà l'operazione di registrazione di un client (in RMI). 
+ * 	- Avviare tutti i Thread necessari al funzionamento del Server (Listener e ThreadPool).
+ */
 public class WQServer {
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		Structures WordQuizzleUsers = new Structures();
+		// Oggetto Structures istanziato una sola volta e condiviso tra tutti i Thread del server (vedere "Structures")
+		Structures WordQuizzleSupport = new Structures();
 		
 		int NWORKERS = 2;
-		int myTCPPort = 16000;
 		int myRMIPort = 15000;
 		RegisterImpl register = null;
 		
+		// Esportazione dell'oggetto che realizza l'operazione di registrazione
 		try {
-			register = new RegisterImpl(WordQuizzleUsers);
+			register = new RegisterImpl(WordQuizzleSupport);
 			RegisterInterface stub = (RegisterInterface) UnicastRemoteObject.exportObject(register, 0);
 
 			LocateRegistry.createRegistry(myRMIPort);
@@ -34,20 +43,17 @@ public class WQServer {
 			e.printStackTrace();
 		}
 		
-		ServerSocket server = null;
-		ExecutorService threadPool = Executors.newFixedThreadPool(NWORKERS);
+		// Istanzio la ThreadPool
+		ThreadPoolExecutor poolWorker = (ThreadPoolExecutor) Executors.newFixedThreadPool(NWORKERS);
 		
-		try {
-			server = new ServerSocket(myTCPPort);
-			System.out.println("Web server waiting for request on port " + myTCPPort);
-
-			while(true) {
-				Socket client = server.accept();
-				threadPool.execute(new RequestHandler(client, WordQuizzleUsers));
-			}	
-		}
-		catch (IOException e) {
-			threadPool.shutdown();
-		}
-	}
+		// Istanzio un task Listener passandogli la queue dove inserirà le socket dei client accettati (vedere "Listener")
+		Listener listener = new Listener(WordQuizzleSupport.getRequestsQueue());
+		Thread Welcome = new Thread(listener);
+		Welcome.start();
+		
+		// Faccio partire i Thread Worker che eseguiranno tutti il task "RequestHandler"
+		for (int i=0; i<NWORKERS; i++)
+			poolWorker.execute(new RequestHandler(WordQuizzleSupport));
+		
+	}	
 }

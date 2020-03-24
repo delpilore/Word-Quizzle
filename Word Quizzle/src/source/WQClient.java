@@ -1,9 +1,5 @@
 package source;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
@@ -12,18 +8,28 @@ import java.util.Scanner;
 
 import source.RegisterInterface.UserAlreadyRegisteredException;
 
+//AUTHOR: Lorenzo Del Prete, Corso B, 531417
+
+/*
+* WQCLIENT
+* 
+* WQClient è il programma client relativo al servizio Word Quizzle. 
+* 
+*/
+
 public class WQClient {
 	
 	public static void main(String[] args) {
 		
 		Remote remoteObject;
 		RegisterInterface serverObject;
-		Request request;
-		Response response;
+		Request request = null;
+		Response response = null;
 		
 		Scanner input = new Scanner(System.in);
 		String command;
 		Boolean on = true;
+		Boolean logged = false;
 		
 		Socket socket = null;
 		String hostname = "localhost"; 
@@ -32,24 +38,21 @@ public class WQClient {
 		
         String usr, pass;
 		
-		System.out.print("Benvenuto/a in World Quizzle!\n");
+		System.out.print("Benvenuto/a in Word Quizzle!\n");
         
         while(on) {
         	
-	   		 System.out.print("\nAiuto: --help\n"
-					 + "usage : COMMAND [ ARGS ... ]\n"
+	   		System.out.print("\nusage : COMMAND [ ARGS ... ]\n"
 	                 + "\tR: Registrati come nuovo utente\n"
 	                 + "\tL: Effettua il login\n"
-	                 + "\tLo: Effettua il logout\n"
-	                 + "\tA: Aggiungi un amico\n"
-	                 + "\tLa: Vedi la tua lista amici\n"
-	                 + "\tS: Sfida un amico\n"
-	                 + "\tMp: Vedi il tuo punteggio\n"
-	                 + "\tMc: Vedi la classifica con i tuoi amici\n"
-	         		 + "\tX: Chiudi\n\t");
+	                 + "\tX: Chiudi\n");
 	        command = input.next();
 	        
 	        switch (command) {
+	        
+	        /*
+	         * REGISTRAZIONE
+	         */
 		        case "R":
 		        case "r":
 		            System.out.print("Nome utente: ");
@@ -78,6 +81,9 @@ public class WQClient {
 		            
 				break;
 				
+	        /*
+	         * LOGIN
+	         */
 		        case "L":
 		        case "l":
 		            System.out.print("Nome utente: ");
@@ -85,68 +91,83 @@ public class WQClient {
 		            System.out.print("Password: ");
 		            pass = input.next();
 		            
-		            request = new Request(usr, pass, "L");
+		            request = new Request(usr, pass, Operations.LOGIN ,null);
 		            
 		        	try { 
+		        		System.out.print("Tentativo di connessione\n");
 		        		socket = new Socket(hostname, myTCPPort);
 		        		
-		        		ObjectOutputStream writer = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-		        		writer.writeObject(request);
-		        		writer.flush();
-		        		
-		        		ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-
-		        		response = (Response) reader.readObject();
-		        		
-		        		reader.close(); 
-		        		writer.close(); 
-		        		
-		        		System.out.print("Risposta alla richiesta: " + response.getResponse());
+		        		Utility.write(socket, request);
+		        		response = (Response) Utility.read(socket);
 		        	}
 		        	catch (Exception e) {
-		        		e.printStackTrace(); 
-		        	}
+			        	e.printStackTrace(); 
+			        }
+		        		
+	        		switch(response.getStatusCode()) {
+	        			
+	        			case OK:
+		        			System.out.print("\nPannello di controllo di " + usr + ", sei attualmente loggato a Word Quizzle!\n");
+		        			logged=true;
+		        			while(logged) {
+		        				System.out.print( "\n\tLo: Effettua il logout\n"
+		       		                 + "\tA: Aggiungi un amico\n"
+		    		                 + "\tLa: Vedi la tua lista amici\n"
+		    		                 + "\tS: Sfida un amico\n"
+		    		                 + "\tMp: Vedi il tuo punteggio\n"
+		    		                 + "\tMc: Vedi la classifica con i tuoi amici\n"
+		    		         		 + "\tX: Chiudi (ed effettua il logout) \n\t" );
+		        				command = input.next();
+		        				
+		        				switch (command) {
+		        				
+			        		        case "Lo":
+			        		        case "lo":
+			        		        case "X":
+			        		        case "x":
+			        		        	
+			        		        	if(command.equals("x") || command.equals("X")) {
+				        		        	System.out.print("Chiudo ed effettuo il logout\n");
+				        		        	logged = false;
+				        		        	on = false;
+			        		        	}
+			        		        	
+			        		            request = new Request(usr, null, Operations.LOGOUT, null);
+			        		        	
+			        		        	try {
+	
+				        		            Utility.write(socket,request);
+			        		        		response = (Response) Utility.read(socket);
+		
+			        		        		System.out.print(response.getStatusCode() + ": " + response.getStatusCode().label +"\n");
+			        		        		if (response.getStatusCode() == StatusCodes.OK)
+			        		        			logged = false;		
+			        		        	}
+			        		        	catch(Exception e) {
+			        		        		e.printStackTrace();
+			        		        	}
+			        		        break;
+		        				}
+		        			}
+		        		break;
+		        			
+	        			default:
+	        				System.out.print(response.getStatusCode() + ": " + response.getStatusCode().label +"\n");
+		        		break;
+	        		}
 		        	
 		        break;
 		        
-		        case "Lo":
-		        case "lo":
-		            System.out.print("Nome utente: ");
-		            usr = input.next();
-		            
-		            request = new Request(usr, null, "Lo");
-		            
-		        	try { 
-		        		socket = new Socket(hostname, myTCPPort);
-		        		
-		        		ObjectOutputStream writer = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-		        		writer.writeObject(request);
-		        		writer.flush();
-		        		
-		        		ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-
-		        		response = (Response) reader.readObject();
-		        		
-		        		reader.close(); 
-		        		writer.close(); 
-		        		
-		        		System.out.print("Risposta alla richiesta: " + response.getResponse());
-		        	}
-		        	catch (Exception e) {
-		        		e.printStackTrace(); 
-		        	}
-		        	
-		        break;
-				
+	        /*
+	         * CHIUDI
+	         */
 		        case "X":
 		        case "x":
 		        	System.out.print("Chiudo\n");
 		        	on = false;
-		        break;
-		
+		        break;	
 	        }
         }
-        
         input.close();    
 	}
 }
