@@ -8,12 +8,14 @@ public class Request implements Serializable {
 	
 	private String username;
 	private String password;
-	private String command;
+	private Operations operation;
+	private String message;
 	
-	public Request(String _username, String _password, String _command) {
+	public Request(String _username, String _password, Operations _operation, String _message) {
 		username = _username;
 		password = _password;
-		command = _command;	
+		operation = _operation;	
+		message = _message;
 	}
 	
 	public String getRequestUsername() {
@@ -23,8 +25,12 @@ public class Request implements Serializable {
 	public String getRequestPassword() {
 		return password;
 	}
+
+	public Operations getRequestCommand() {
+		return operation;
+	}
 	
-	public String getRequestCommand() {
-		return command;
+	public String getRequestMessage() {
+		return message;
 	}
 }

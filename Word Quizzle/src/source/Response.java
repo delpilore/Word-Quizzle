@@ -6,13 +6,14 @@ public class Response implements Serializable {
 
 	private static final long serialVersionUID = 4780598293424730148L;
 	
-	private String response;
+	private StatusCodes statusCode;
 	
-	public Response(String _response) {
-		response = _response;
+	public Response(String _response, StatusCodes _statusCode) {
+		statusCode = _statusCode;
 	}
 	
-	public String getResponse() {
-		return response;
+	public StatusCodes getStatusCode() {
+		return statusCode;
 	}
+	
 }
