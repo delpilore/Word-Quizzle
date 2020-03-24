@@ -1,10 +1,7 @@
 package source;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class RequestHandler implements Runnable {
 	
@@ -14,85 +11,83 @@ public class RequestHandler implements Runnable {
 	private Request request;
 	private Response response;
 	
-	public RequestHandler(Socket _client, Structures _support) {
-		client = _client;
+	private LinkedBlockingQueue<Socket> requestQueue;
+	
+	public RequestHandler(Structures _support) {
 		WordQuizzleUsers = _support;
+		requestQueue = WordQuizzleUsers.getRequestsQueue();
 	}
 	
 	public void run() {
 		
-		try {
-		
-			ObjectOutputStream writer = new ObjectOutputStream(new BufferedOutputStream(client.getOutputStream()));
-			ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
+		while(true) {
 			
-			request = (Request) reader.readObject();
-			
-			String usr = request.getRequestUsername();
-			String pass = request.getRequestPassword();
-
-			switch (request.getRequestCommand()) {
-				case "L":
-					
-					if (!WordQuizzleUsers.containsUser(usr))
-						response = new Response ("Non sei registrato!");
-					
-					else if (!pass.equals(WordQuizzleUsers.getUser(usr).getPassword()))
-						response = new Response ("Password sbagliata!");
-					
-					else if (WordQuizzleUsers.getUser(usr).getOnlineState())
-						response = new Response ("Sei già loggato!");	
-					
-					else {
-						response = new Response ("Da ora sei loggato!");
-						WordQuizzleUsers.getUser(usr).setOnlineState(true); // qua potrei anche aggiornare il file JSON ma mi sembra ragionevole che se il server si ferma mentre l'utente era online
-																			// al riavvio risulti offline.
+			synchronized(requestQueue) {
+				while(requestQueue.isEmpty()) {
+					try {
+						requestQueue.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
-					
-	        		writer.writeObject(response);
-	        		writer.flush();
-	        		
-	        		reader.close(); 
-	        		writer.close(); 
-	        		
-	        	break;
-	        	
-				case "Lo":
-
-					if (!WordQuizzleUsers.containsUser(usr))
-						response = new Response ("Non sei registrato!");
-					
-					else if (!WordQuizzleUsers.getUser(usr).getOnlineState())
-						response = new Response ("Non puoi effettuare il logout se prima non ti logghi!");	
-					
-					else {
-						response = new Response ("Da ora non sei più loggato!");
-						WordQuizzleUsers.getUser(usr).setOnlineState(false);
-					}
-					
-	        		writer.writeObject(response);
-	        		writer.flush();
-	        		
-	        		reader.close(); 
-	        		writer.close(); 
-				
-	        	break;
-					
-	        	
-	        	default:
-	        		response = new Response ("comando non ancora gestibile");
-	        		
-	        		writer.writeObject(response);
-	        		writer.flush();
-	        		
-	        		reader.close(); 
-	        		writer.close(); 
-	        		
-	        	break;
+				}
 			}
+			
+			client = requestQueue.poll();
+			
+			try {
+				
+				request = (Request) Utility.read(client);
+				
+				String usr = request.getRequestUsername();
+				String pass = request.getRequestPassword();
+				//String message = request.getRequestMessage();
+	
+				switch (request.getRequestCommand()) {
+					case LOGIN:
+						
+						if (!WordQuizzleUsers.containsUser(usr)) {
+							response = new Response ("Non sei registrato!", StatusCodes.USERNOTREGISTERED);
+							Utility.write(client,response);
+			        		client.close();
+						}
+						
+						else if (!pass.equals(WordQuizzleUsers.getUser(usr).getPassword())) {
+							response = new Response ("Password sbagliata!", StatusCodes.WRONGPASSWORD);
+							Utility.write(client,response);
+			        		client.close();
+						}
+						
+						else {
+							response = new Response ("Da ora sei loggato!", StatusCodes.OK);
+							WordQuizzleUsers.getUser(usr).setOnlineState(true); // qua potrei anche aggiornare il file JSON ma mi sembra ragionevole che se il server si ferma mentre l'utente era online																// al riavvio risulti offline.
+							Utility.write(client,response);
+							
+							synchronized(requestQueue) {
+								requestQueue.add(client);
+								requestQueue.notify();
+							}
+						}
+					
+		        	break;
+		        	
+					case LOGOUT:
+	
+						response = new Response ("Da ora non sei più loggato!", StatusCodes.OK);
+						WordQuizzleUsers.getUser(usr).setOnlineState(false);
+						Utility.write(client,response);
+		        		
+		        		client.close();
+		        		
+		        	break;
+		        	
+				default:
+					break;
+					        
+				}
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}	
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}	
 	}
 }
