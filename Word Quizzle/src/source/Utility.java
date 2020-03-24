@@ -8,9 +8,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class Utility {
-	public static void write(Socket server, Object request) {
+	public static void write(Socket receiver, Object request) {
 		try {
-			ObjectOutputStream writer = new ObjectOutputStream(new BufferedOutputStream(server.getOutputStream()));
+			ObjectOutputStream writer = new ObjectOutputStream(new BufferedOutputStream(receiver.getOutputStream()));
 			writer.writeObject(request);
 			writer.flush();
 		} catch (IOException e) {
@@ -18,9 +18,9 @@ public class Utility {
 		}
 	}
 	
-	public static Object read(Socket client) {
+	public static Object read(Socket sender) {
 		try {
-			ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
+			ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(sender.getInputStream()));
 			return reader.readObject();
 		} catch (Exception e) {
 			e.printStackTrace();
