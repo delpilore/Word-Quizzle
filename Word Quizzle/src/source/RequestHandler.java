@@ -126,6 +126,29 @@ public class RequestHandler implements Runnable {
 						}
 		        	break;
 		        	
+					case SCORE:
+						
+						Utility.write(client,WordQuizzleUsers.getUser(usr).getScore());
+						
+						synchronized(requestQueue) {
+							requestQueue.add(client);
+							requestQueue.notify();
+						}
+					
+					break;
+					
+					case RANKING:
+						
+						JsonNode rankingTable = Utility.getRanking(WordQuizzleUsers, usr);
+						
+						Utility.write(client,rankingTable);
+						
+						synchronized(requestQueue) {
+							requestQueue.add(client);
+							requestQueue.notify();
+						}
+		        	break;
+		        	
 				default:
 					break;
 					        

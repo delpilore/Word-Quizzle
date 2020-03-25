@@ -4,6 +4,7 @@ import java.net.Socket;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Iterator;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -126,8 +127,8 @@ public class WQClient {
 		       		                 + "\tA: Aggiungi un amico\n"
 		    		                 + "\tLa: Vedi la tua lista amici\n"
 		    		                 + "\tS: Sfida un amico\n"
-		    		                 + "\tMp: Vedi il tuo punteggio\n"
-		    		                 + "\tMc: Vedi la classifica con i tuoi amici\n"
+		    		                 + "\tP: Vedi il tuo punteggio\n"
+		    		                 + "\tC: Vedi la classifica con i tuoi amici\n"
 		    		         		 + "\tX: Chiudi (ed effettua il logout) \n\t" );
 		        				command = input.next();
 		        				
@@ -220,12 +221,71 @@ public class WQClient {
 			        		        	
 			        		        	System.out.print("\t-----------------\n");
 			        		        break;
+			        		        
+			        		        case "P":
+			        		        case "p":
+			        		        	
+			        		        	System.out.print("\n\t-----------------\n");
+			        		        	
+			        		        	request = new Request(usr, null, Operations.SCORE, null);
+			        		        
+			        		        	try {
+			        		        		
+				        		            Utility.write(socket,request);
+			        		        		int score = (int) Utility.read(socket);
+			        		        		
+			        		        		System.out.print("\tIl tuo punteggio è: " + score + "\n");
+			        		        		
+			        		        	}
+			        		        	catch(Exception e) {
+			        		        		e.printStackTrace();
+			        		        	}
+			        		        	
+			        		        	System.out.print("\t-----------------\n");
+			        		        	
+			        		        	
+			        		        break;
+			        		        
+			        		        case "C":
+			        		        case "c":
+			        		        	
+			        		        	System.out.print("\n\t-----------------\n");
+			        		        	
+			        		        	request = new Request(usr, null, Operations.RANKING, null);
+			        		        
+			        		        	try {
+			        		        		
+				        		            Utility.write(socket,request);
+				        		            
+				        		            JsonNode json = (JsonNode) Utility.read(socket);
+				        		            
+				        		            if (json.isEmpty()){
+				        		            	System.out.print("\tLa tua lista amici è vuota!\n");
+				        		            }
+				        		            else {
+				        		            	System.out.print("\tEcco la tua classifica con i tuoi amici:\n");
+				        		            	Iterator<String> fieldNames = json.fieldNames();
+
+				        		            	while(fieldNames.hasNext()) {
+				        		            	    String fieldName = fieldNames.next();
+				        		            	    JsonNode field = json.get(fieldName);
+				        		            	    System.out.println("\t" + fieldName + ": " + field.asInt());
+				        		            	}
+				        		            }
+			        		        	}
+			        		        	catch(Exception e) {
+			        		        		e.printStackTrace();
+			        		        	}
+			        		        	
+			        		        	System.out.print("\t-----------------\n");
+			        		        break;
 		        				}
 		        			}
 		        		break;
 		        			
 	        			default:
-	        				System.out.print(response.getStatusCode() + ": " + response.getStatusCode().label +"\n");
+	        				System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
+	        				System.out.print("\t-----------------\n");
 		        		break;
 	        		}
 		        	
