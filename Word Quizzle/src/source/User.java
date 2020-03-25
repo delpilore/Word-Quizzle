@@ -8,17 +8,20 @@ public class User {
 	private String password;
 	private Boolean OnlineState=false;
 	private ArrayList<String> FriendList;
+	private int score;
 
 	public User(String _username, String _password) {
 		setUsername(_username);
 		setPassword(_password);
 		setFriendList(new ArrayList<String>());
+		setScore(0);
 	}
 	
 	public User() {
 		setUsername(null);
 		setPassword(null);
 		setFriendList(null);
+		setScore(0);
 	}
 
 	private void setUsername(String username) {
@@ -59,5 +62,17 @@ public class User {
 	
 	public boolean isFriend(String _user) {
 		return FriendList.contains(_user);
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+	
+	public void updateScore(int _matchscore) {
+		score = score + _matchscore;
 	}
 }
