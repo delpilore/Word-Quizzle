@@ -17,7 +17,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Listener implements Runnable {
 
-	
+	// Rispettivamente: porta da cui il server ascolterà le richieste di connessione, socket d'accettazione, LinkedBlockingQueue
+	// condivisa con gli altri thread del server e passata come argomento al costruttore in fase di istanziazione.
 	private int myTCPPort = 16000;
 	private ServerSocket server = null;																
 	private LinkedBlockingQueue<Socket> queue;
