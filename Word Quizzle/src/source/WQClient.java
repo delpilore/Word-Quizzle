@@ -59,9 +59,10 @@ public class WQClient {
 	         */
 		        case "R":
 		        case "r":
-		            System.out.print("Nome utente: ");
+		        	System.out.print("\n\t-----------------\n");
+		            System.out.print("\tNome utente: ");
 		            usr = input.next();
-		            System.out.print("Password: ");
+		            System.out.print("\tPassword: ");
 		            pass = input.next();
 		            
 		    		try {
@@ -70,21 +71,22 @@ public class WQClient {
 		    			serverObject = (RegisterInterface) remoteObject;
 		    			
 		    			if (serverObject.registra_utente(usr, pass))
-		    				System.out.print("Registrato!\n");
+		    				System.out.print("\tRegistrato!\n");
 		    			
 		    		}
 		    		catch(UserAlreadyRegisteredException e) {
-		    			System.out.print("Questo username è stato già preso!\n");
+		    			System.out.print("\tQuesto username è stato già preso!\n");
 		    		}
 		    		catch(WeakPasswordException e) {
-		    			System.out.print("Password troppo corta! Deve essere almeno di 4 caratteri!\n");
+		    			System.out.print("\tPassword troppo corta! Deve essere almeno di 4 caratteri!\n");
 		    		}
 		    		catch(UsernameTooShortException e) {
-		    			System.out.print("Nome utente troppo corto! Deve essere almeno di 3 caratteri!\n");
+		    			System.out.print("\tNome utente troppo corto! Deve essere almeno di 3 caratteri!\n");
 		    		}
 		    		catch(Exception e) {
-		    			System.out.print("Qualcosa è andato storto..\n");
+		    			System.out.print("\tQualcosa è andato storto..\n");
 		    		}
+		    		System.out.print("\t-----------------\n");
 		            
 				break;
 				
@@ -93,15 +95,16 @@ public class WQClient {
 	         */
 		        case "L":
 		        case "l":
-		            System.out.print("Nome utente: ");
+		        	System.out.print("\n\t-----------------\n");
+		            System.out.print("\tNome utente: ");
 		            usr = input.next();
-		            System.out.print("Password: ");
+		            System.out.print("\tPassword: ");
 		            pass = input.next();
 		            
 		            request = new Request(usr, pass, Operations.LOGIN ,null);
 		            
 		        	try { 
-		        		System.out.print("Tentativo di connessione\n");
+		        		System.out.print("\tTentativo di connessione...\n");
 		        		socket = new Socket(hostname, myTCPPort);
 		        		
 		        		Utility.write(socket, request);
@@ -114,6 +117,8 @@ public class WQClient {
 	        		switch(response.getStatusCode()) {
 	        			
 	        			case OK:
+	        				System.out.print("\tSei loggato!\n");
+	        				System.out.print("\t-----------------\n");
 		        			System.out.print("\nPannello di controllo di " + usr + ", sei attualmente loggato a Word Quizzle!\n");
 		        			logged=true;
 		        			while(logged) {
@@ -132,12 +137,15 @@ public class WQClient {
 			        		        case "lo":
 			        		        case "X":
 			        		        case "x":
+			        		        	System.out.print("\n\t-----------------\n");
 			        		        	
 			        		        	if(command.equals("x") || command.equals("X")) {
-				        		        	System.out.print("Chiudo ed effettuo il logout\n");
+				        		        	System.out.print("\tChiudo ed effettuo il logout\n");
 				        		        	logged = false;
 				        		        	on = false;
 			        		        	}
+			        		        	else 
+			        		        		System.out.print("\tEffettuo il logout\n");
 			        		        	
 			        		            request = new Request(usr, null, Operations.LOGOUT, null);
 			        		        	
@@ -146,19 +154,23 @@ public class WQClient {
 				        		            Utility.write(socket,request);
 			        		        		response = (Response) Utility.read(socket);
 		
-			        		        		System.out.print(response.getStatusCode() + ": " + response.getStatusCode().label +"\n");
+			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
 			        		        		if (response.getStatusCode() == StatusCodes.OK)
 			        		        			logged = false;		
 			        		        	}
 			        		        	catch(Exception e) {
 			        		        		e.printStackTrace();
 			        		        	}
+			        		        	
+			        		        	System.out.print("\t-----------------\n");
 			        		        break;
 			        		        
 			        		        case "A":
 			        		        case "a":
 			        		        	
-			        		        	System.out.print("Nome utente della persona che vuoi aggiungere come amico: ");
+			        		        	System.out.print("\n\t-----------------\n");
+			        		        	
+			        		        	System.out.print("\tNome utente della persona che vuoi aggiungere come amico: ");
 			        		        	String friend = input.next();
 			        		        	request = new Request(usr, null, Operations.ADDFRIEND, friend);
 			        		        
@@ -167,16 +179,20 @@ public class WQClient {
 				        		            Utility.write(socket,request);
 			        		        		response = (Response) Utility.read(socket);
 		
-			        		        		System.out.print(response.getStatusCode() + ": " + response.getStatusCode().label +"\n");
+			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
 			        		        		
 			        		        	}
 			        		        	catch(Exception e) {
 			        		        		e.printStackTrace();
 			        		        	}
+			        		        	
+			        		        	System.out.print("\t-----------------\n");
 			        		        break;
 			        		        
 			        		        case "La":
 			        		        case "la":
+			        		        	
+			        		        	System.out.print("\n\t-----------------\n");
 			        		        	
 			        		        	request = new Request(usr, null, Operations.FRIENDLIST, null);
 			        		        
@@ -185,18 +201,24 @@ public class WQClient {
 				        		            Utility.write(socket,request);
 				        		            
 				        		            JsonNode json = (JsonNode) Utility.read(socket);
-
-		        		        			System.out.print("Ecco la tua lista amici:\n");
-		        		        			if (json.isArray()) {
-		        		        			    for (final JsonNode objNode : json) {
-		        		        			        System.out.println("\t- " + objNode);
-		        		        			    }
-		        		        			}
-			        		        		
+				        		            
+				        		            if (json.isEmpty()){
+				        		            	System.out.print("\tLa tua lista amici è vuota!\n");
+				        		            }
+				        		            else {
+			        		        			System.out.print("\tEcco la tua lista amici:\n");
+			        		        			if (json.isArray()) {
+			        		        			    for (final JsonNode objNode : json) {
+			        		        			        System.out.println("\t- " + objNode);
+			        		        			    }
+			        		        			}
+				        		            }
 			        		        	}
 			        		        	catch(Exception e) {
 			        		        		e.printStackTrace();
 			        		        	}
+			        		        	
+			        		        	System.out.print("\t-----------------\n");
 			        		        break;
 		        				}
 		        			}
