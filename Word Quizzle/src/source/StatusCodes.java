@@ -24,6 +24,7 @@ public enum StatusCodes {
 
     public final String label;
     
+    
     private StatusCodes(String label) {
         this.label = label;
     }
