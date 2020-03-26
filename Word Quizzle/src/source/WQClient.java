@@ -1,5 +1,7 @@
 package source;
 
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
@@ -26,6 +28,8 @@ public class WQClient {
 	
 	public static void main(String[] args) {
 		
+        String usr, pass;
+		
 		Remote remoteObject;
 		RegisterInterface serverObject;
 		Request request = null;
@@ -38,15 +42,19 @@ public class WQClient {
 		
 		Socket socket = null;
 		String hostname = "localhost"; 
-		int myTCPPort = 16000;
-		int myRMIPort = 15000;
-		
-		int UDPPort;
-		
-        String usr, pass;
+		int serverTCPPort = 16000;
+		int serverRMIPort = 15000;
+		int myUDPPort = Utility.portScanner(); // la porta UDP dove il thread per accettazione richieste di sfida ascolterà
 		
 		System.out.print("Benvenuto/a in Word Quizzle!\n");
-        
+		System.out.println("\tAvvio thread per accettazione richieste di sfida...");
+		 
+		// Thread per accettazione richieste di sfida
+		ClientChallengeListener Listener = new ClientChallengeListener(myUDPPort);
+		Thread Acceptor = new Thread(Listener);
+		Acceptor.start();
+		System.out.println("\tThread Attivato!");
+		
         while(on) {
         	
 	   		System.out.print("\nusage : COMMAND [ ARGS ... ]\n"
@@ -69,7 +77,7 @@ public class WQClient {
 		            pass = input.next();
 		            
 		    		try {
-		    			Registry r = LocateRegistry.getRegistry(myRMIPort);
+		    			Registry r = LocateRegistry.getRegistry(serverRMIPort);
 		    			remoteObject = r.lookup("REGISTER-SERVER");
 		    			serverObject = (RegisterInterface) remoteObject;
 		    			
@@ -108,7 +116,7 @@ public class WQClient {
 		            
 		        	try { 
 		        		System.out.print("\tTentativo di connessione...\n");
-		        		socket = new Socket(hostname, myTCPPort);
+		        		socket = new Socket(hostname, serverTCPPort);
 		        		
 		        		Utility.write(socket, request);
 		        		response = (Response) Utility.read(socket);
@@ -122,21 +130,16 @@ public class WQClient {
 	        			case OK:
 	        					
 	        				System.out.print("\n\tSei loggato!\n");
-	        				System.out.println("\tAvvio thread per accettazione richieste di sfida...");
-	        				UDPPort = Utility.portScanner();
 	        				
 	        				// Scrivo al server la porta UDP selezionata su cui il Listener per le sfide ascolterà
-	        				Utility.write(socket, UDPPort);
-	        				
-	        				ClientChallengeListener listener = new ClientChallengeListener(UDPPort);
-	        				Thread Acceptor = new Thread(listener);
-	        				Acceptor.start();
+	        				Utility.write(socket, myUDPPort);
 	        				
 	        				System.out.print("\t-----------------\n");
-
-		        			System.out.print("\nPannello di controllo di " + usr + ", sei attualmente loggato a Word Quizzle!\n");
+  				
 		        			logged=true;
 		        			while(logged) {
+
+			        			System.out.print("\nPannello di controllo di " + usr + ", sei attualmente loggato a Word Quizzle!\n");
 		        				System.out.print( "\n\tLo: Effettua il logout\n"
 		       		                 + "\tA: Aggiungi un amico\n"
 		    		                 + "\tLa: Vedi la tua lista amici\n"
@@ -170,7 +173,8 @@ public class WQClient {
 			        		        		response = (Response) Utility.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
-			        		        		if (response.getStatusCode() == StatusCodes.OK)
+			        		        		
+			        		        		if (response.getStatusCode() == StatusCodes.OK) 
 			        		        			logged = false;		
 			        		        	}
 			        		        	catch(Exception e) {
@@ -319,6 +323,28 @@ public class WQClient {
 				        		           
 			        		        	
 			        		        break;
+			        		        
+			        		        case "y":
+			        		        case "n":
+			        		        	if (Listener.isChallenged()) {
+				        		        	try {
+				        		        		
+												Listener.setChallenged(false);
+					        	            	InetAddress ip = InetAddress.getLocalHost(); 
+					        		        
+					        		    		byte[] send = command.getBytes();
+					        					DatagramPacket DpSend = new DatagramPacket(send, send.length, ip, Listener.getServerUDPPort()); 
+					        					
+												Listener.getDatagramSocket().send(DpSend);
+
+				        		        	}
+				        		        	catch(Exception e) {
+				        		        		e.printStackTrace();
+				        		        	}
+			        		        	}
+			        		        	else
+			        		        		System.out.println("\tComando non riconosciuto\n");
+			        				break;
 		        				}
 		        			}
 		        		break;

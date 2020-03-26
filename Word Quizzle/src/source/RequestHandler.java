@@ -65,11 +65,11 @@ public class RequestHandler implements Runnable {
 						
 						else {
 							response = new Response (StatusCodes.OK);
-							WordQuizzleUsers.getUser(usr).setOnlineState(true); 													
+																		
 							Utility.write(client,response);
 							
 							// Se il login ha successo mi aspetto che il client mi invii la porta dove ascolta il suo
-							// listener UDP
+							// listener UDP, lo aggiungo ai Challengers (è come se fosse online)
 							int port = (int) Utility.read(client);
 							WordQuizzleUsers.addChallenger(usr, port);
 							
@@ -86,9 +86,7 @@ public class RequestHandler implements Runnable {
 					case LOGOUT:
 	
 						response = new Response (StatusCodes.OK);
-						// Setto stato ad offline, di conseguenza non potrà più essere sfidato, quindi tolgo anche 
-						// l'occorrenza dalla tabella in Structures
-						WordQuizzleUsers.getUser(usr).setOnlineState(false);
+						// Tolgo anche l'occorrenza dalla tabella in Structures in modo da renderlo "offline"
 						WordQuizzleUsers.removeChallenger(usr);
 						Utility.write(client,response);
 		        		
@@ -101,11 +99,15 @@ public class RequestHandler implements Runnable {
 					case ADDFRIEND:
 						
 						if (!WordQuizzleUsers.containsUser(message)) {
-							response = new Response (StatusCodes.WRONGFRIENDREQUEST);
+							response = new Response (StatusCodes.WRONGREQUEST);
 							Utility.write(client,response);
 						}
 						else if (WordQuizzleUsers.getUser(usr).isFriend(message)){
 							response = new Response (StatusCodes.ALREADYFRIENDS);
+							Utility.write(client,response);
+						}
+						else if (usr.equals(message)){
+							response = new Response (StatusCodes.SELFREQUEST);
 							Utility.write(client,response);
 						}
 						else {
@@ -162,14 +164,56 @@ public class RequestHandler implements Runnable {
 		        	
 					case CHALLENGEFRIEND:
 						
-						String inp = "Sfida";
+						if (!WordQuizzleUsers.containsUser(message)) {
+							response = new Response (StatusCodes.WRONGREQUEST);
+							Utility.write(client,response);
+						}
+						else if (!WordQuizzleUsers.containsChallenger(message)) {
+							response = new Response (StatusCodes.USERNOTONLINE);
+							Utility.write(client,response);
+						}
+						else if (usr.equals(message)){
+							response = new Response (StatusCodes.SELFREQUEST);
+							Utility.write(client,response);
+						}
+						else if (!WordQuizzleUsers.getUser(message).isFriend(usr)){
+							response = new Response (StatusCodes.NOTFRIENDS);
+							Utility.write(client,response);
+						}	
+						else {
+							byte buf[] = usr.getBytes();
+							byte[] receive = new byte[100]; 
+							
+							InetAddress ip = InetAddress.getLocalHost(); 
+							DatagramSocket ds = new DatagramSocket();
+							
+							DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, WordQuizzleUsers.getChallenger(message)); 
+							DatagramPacket DpReceive = new DatagramPacket(receive, receive.length); 
+							
+							ds.send(DpSend); 
+				            ds.receive(DpReceive);
+				            
+				            if(Utility.data(receive).toString().equals("y")) {
+								response = new Response (StatusCodes.MATCHSTARTING);
+								Utility.write(client,response);
+				            }
+				            else if (Utility.data(receive).toString().equals("n")){
+								response = new Response (StatusCodes.MATCHDECLINED);
+								Utility.write(client,response);
+				            }
+				            else {
+				            	response = new Response (StatusCodes.TIMEOUT);
+								Utility.write(client,response);
+				            }
+				            
+				            ds.close();
+				            	
+						}
 						
-						byte buf[] = inp.getBytes();
-						InetAddress ip = InetAddress.getLocalHost(); 
-						DatagramSocket ds = new DatagramSocket();
-						DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, WordQuizzleUsers.getChallenger(message)); 
-
-				        ds.send(DpSend); 
+						synchronized(requestQueue) {
+							requestQueue.add(client);
+							requestQueue.notify();
+						}
 					
 					break;
 		        	
