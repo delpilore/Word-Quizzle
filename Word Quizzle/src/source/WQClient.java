@@ -41,6 +41,8 @@ public class WQClient {
 		int myTCPPort = 16000;
 		int myRMIPort = 15000;
 		
+		int UDPPort;
+		
         String usr, pass;
 		
 		System.out.print("Benvenuto/a in Word Quizzle!\n");
@@ -118,8 +120,20 @@ public class WQClient {
 	        		switch(response.getStatusCode()) {
 	        			
 	        			case OK:
-	        				System.out.print("\tSei loggato!\n");
+	        					
+	        				System.out.print("\n\tSei loggato!\n");
+	        				System.out.println("\tAvvio thread per accettazione richieste di sfida...");
+	        				UDPPort = Utility.portScanner();
+	        				
+	        				// Scrivo al server la porta UDP selezionata su cui il Listener per le sfide ascolterà
+	        				Utility.write(socket, UDPPort);
+	        				
+	        				ClientChallengeListener listener = new ClientChallengeListener(UDPPort);
+	        				Thread Acceptor = new Thread(listener);
+	        				Acceptor.start();
+	        				
 	        				System.out.print("\t-----------------\n");
+
 		        			System.out.print("\nPannello di controllo di " + usr + ", sei attualmente loggato a Word Quizzle!\n");
 		        			logged=true;
 		        			while(logged) {
@@ -278,6 +292,32 @@ public class WQClient {
 			        		        	}
 			        		        	
 			        		        	System.out.print("\t-----------------\n");
+			        		        break;
+			        		        
+			        		        case "S":
+			        		        case "s":
+			        		        	
+			        		        	System.out.print("\n\t-----------------\n");
+			        		        	System.out.print("\tNome utente dell'amico che vuoi sfidare: ");
+			        		        	String opponent = input.next();
+			        		        	
+			        		        	request = new Request(usr, null, Operations.CHALLENGEFRIEND, opponent);
+			        		        
+			        		        	try {
+			        		        		
+				        		            Utility.write(socket,request);
+			        		        		response = (Response) Utility.read(socket);
+		
+			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
+			        		        		
+			        		        	}
+			        		        	catch(Exception e) {
+			        		        		e.printStackTrace();
+			        		        	}
+			        		        	
+			        		        	System.out.print("\t-----------------\n");
+				        		           
+			        		        	
 			        		        break;
 		        				}
 		        			}
