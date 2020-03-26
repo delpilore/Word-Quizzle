@@ -1,5 +1,8 @@
 package source;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -62,8 +65,13 @@ public class RequestHandler implements Runnable {
 						
 						else {
 							response = new Response (StatusCodes.OK);
-							WordQuizzleUsers.getUser(usr).setOnlineState(true); // qua potrei anche aggiornare il file JSON ma mi sembra ragionevole che se il server si ferma mentre l'utente era online																// al riavvio risulti offline.
+							WordQuizzleUsers.getUser(usr).setOnlineState(true); 													
 							Utility.write(client,response);
+							
+							// Se il login ha successo mi aspetto che il client mi invii la porta dove ascolta il suo
+							// listener UDP
+							int port = (int) Utility.read(client);
+							WordQuizzleUsers.addChallenger(usr, port);
 							
 							synchronized(requestQueue) {
 								requestQueue.add(client);
@@ -78,7 +86,10 @@ public class RequestHandler implements Runnable {
 					case LOGOUT:
 	
 						response = new Response (StatusCodes.OK);
+						// Setto stato ad offline, di conseguenza non potrà più essere sfidato, quindi tolgo anche 
+						// l'occorrenza dalla tabella in Structures
 						WordQuizzleUsers.getUser(usr).setOnlineState(false);
+						WordQuizzleUsers.removeChallenger(usr);
 						Utility.write(client,response);
 		        		
 		        		client.close();
@@ -148,6 +159,19 @@ public class RequestHandler implements Runnable {
 							requestQueue.notify();
 						}
 		        	break;
+		        	
+					case CHALLENGEFRIEND:
+						
+						String inp = "Sfida";
+						
+						byte buf[] = inp.getBytes();
+						InetAddress ip = InetAddress.getLocalHost(); 
+						DatagramSocket ds = new DatagramSocket();
+						DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, WordQuizzleUsers.getChallenger(message)); 
+
+				        ds.send(DpSend); 
+					
+					break;
 		        	
 				default:
 					break;
