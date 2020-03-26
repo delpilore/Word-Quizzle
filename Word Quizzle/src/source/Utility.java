@@ -5,6 +5,8 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.BindException;
+import java.net.DatagramSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,5 +92,20 @@ public class Utility {
 		}
 
 		return rankingTable;
+	}
+	
+	public static int portScanner() {
+		for (int i=1024; i<49151; i++){
+			try (DatagramSocket s =new DatagramSocket(i)){ 
+				return i;
+			}
+			catch (BindException e) {
+				System.out.println ("\tPorta " + i + " già in uso");
+			}
+			catch (Exception e) {
+				System.out.println (e);
+			}
+		} 
+		return 0;
 	}
 }
