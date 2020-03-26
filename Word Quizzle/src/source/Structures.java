@@ -106,7 +106,7 @@ public class Structures {
 	// Questo metodo scrive in output sul file JSON, dichiarato e istanziato inizialmente, tutto il contenuto di 
 	// WordQuizzleUsers. In questo modo, la persistenza verrà garantita.
 	// Viene chiamato ogni qualvolta avviene un aggiornamento riguardo ad un utente registrato al servizio. 
-	// (passa da online a offline, cambia il suo punteggio, aggiunge un amico)
+	// (cambia il suo punteggio, aggiunge un amico)
 	public void writeJson() {
 		try {
 			objectMapper.writeValue(json_file, WordQuizzleUsers);
@@ -139,5 +139,9 @@ public class Structures {
 	
 	public void removeChallenger(String _user) {
 		WordQuizzleChallengers.remove(_user);
+	}
+	
+	public Boolean containsChallenger(String _user) {
+		return WordQuizzleChallengers.containsKey(_user);
 	}
 }
