@@ -16,19 +16,16 @@ public class User {
 	// Variabili di stato che rappresentano un utente iscritto a Word Quizzle
 	private String username;
 	private String password;
-	private Boolean OnlineState;
 	private ArrayList<String> FriendList;
 	private int score;
 
 	// User(String _username, String _password)
 	//
 	// Setta username e password dell'oggetto ai relativi _username e _password passati per argomento.
-	// L'onlinestate è inizialmente impostato a false (fino a che l'utente non fa un'operazione di Login)
 	// La sua friendlist è vuota e il suo score è 0
 	public User(String _username, String _password) {
 		setUsername(_username);
 		setPassword(_password);
-		setOnlineState(false);
 		setFriendList(new ArrayList<String>());
 		setScore(0);
 	}
@@ -37,7 +34,6 @@ public class User {
 	public User() {
 		setUsername(null);
 		setPassword(null);
-		setOnlineState(false);
 		setFriendList(null);
 		setScore(0);
 	}
@@ -58,14 +54,6 @@ public class User {
 
 	public String getPassword() {
 		return password;
-	}
-	
-	public void setOnlineState(Boolean _value) { 
-		this.OnlineState = _value;
-	}
-	
-	public boolean getOnlineState() {
-		return OnlineState;
 	}
 	
 	public void setFriendList(ArrayList<String> _friendList) {
