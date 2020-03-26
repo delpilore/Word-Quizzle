@@ -13,8 +13,14 @@ public enum StatusCodes {
 	USERNOTREGISTERED("Non sei registrato!\n"),
 	WRONGPASSWORD("La password inserita non è corretta!\n"),
 	OK("L'operazione è andata a buon fine!\n"),
-	WRONGFRIENDREQUEST("L'utente specificato non è registrato a Word Quizzle!\n"),
-	ALREADYFRIENDS("Sei già amico con questo utente!\n");
+	WRONGREQUEST("L'utente specificato non è registrato a Word Quizzle!\n"),
+	ALREADYFRIENDS("Sei già amico con questo utente!\n"),
+	USERNOTONLINE("L'utente che vuoi sfidare non risulta online!\n"),
+	NOTFRIENDS("Non sei amico con questo utente!\n"),
+	MATCHSTARTING("Ok, la sfida è stata accettata!\n"),
+	MATCHDECLINED("La sfida è stata declinata!\n"),
+	SELFREQUEST("Non puoi mandare una richiesta a te stesso!\n"),
+	TIMEOUT("L'avversario non ha fatto in tempo ad accettare!\n");
 
     public final String label;
     
