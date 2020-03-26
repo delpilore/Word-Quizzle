@@ -100,7 +100,7 @@ public class Utility {
 				return i;
 			}
 			catch (BindException e) {
-				System.out.println ("\tPorta " + i + " già in uso");
+				;
 			}
 			catch (Exception e) {
 				System.out.println (e);
@@ -108,4 +108,18 @@ public class Utility {
 		} 
 		return 0;
 	}
+	
+	public static StringBuilder data(byte[] a) 
+    { 
+        if (a == null) 
+            return null; 
+        StringBuilder ret = new StringBuilder(); 
+        int i = 0; 
+        while (a[i] != 0) 
+        { 
+            ret.append((char) a[i]); 
+            i++; 
+        } 
+        return ret; 
+    } 
 }
