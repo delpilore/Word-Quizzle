@@ -29,7 +29,7 @@ public class WQServer {
 		
 		// Rispettivamente: numero di thread worker attivati, porta associata al servizio registrazione in RMI, oggetto
 		// da esportare non ancora istanziato.
-		int NWORKERS = 2;
+		int NWORKERS = 4;
 		int myRMIPort = 15000;
 		RegisterImpl register = null;
 		
