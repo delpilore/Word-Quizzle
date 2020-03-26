@@ -36,6 +36,8 @@ public class Structures {
 	// Coda di socket accettati dal Listener o attualmente loggati al servizio 
 	private LinkedBlockingQueue<Socket> activeRequests;
 	
+	private Hashtable<String, Integer> WordQuizzleChallengers;
+	
 	// Structures()
 	//
 	// Il metodo costruttore è senz'altro il metodo più importante di questa classe.
@@ -51,6 +53,7 @@ public class Structures {
 		WordQuizzleUsers = new Hashtable<String,User>();
 		json_file = new File("WordQuizzleUsers.json");
 		activeRequests = new LinkedBlockingQueue<Socket>();
+		WordQuizzleChallengers = new Hashtable<String,Integer>();
 		
 		// Istanzio l'ObjectMapper, che ci servirà per scrivere WordQuizzleUsers sul file json_file (e viceversa) 
 		// Inoltre attivo la stampa indentata su di esso (per maggiore leggibilità)
@@ -124,5 +127,17 @@ public class Structures {
 	// Metodo che restituisce la LinkedBlockingQueue dei socket accettati/da gestire
 	public LinkedBlockingQueue<Socket> getRequestsQueue() {
 		return activeRequests;
+	}
+	
+	public void addChallenger(String _user, int _port) {
+		WordQuizzleChallengers.put(_user,_port);
+	}
+	
+	public int getChallenger(String _user) {
+		return WordQuizzleChallengers.get(_user);
+	}
+	
+	public void removeChallenger(String _user) {
+		WordQuizzleChallengers.remove(_user);
 	}
 }
