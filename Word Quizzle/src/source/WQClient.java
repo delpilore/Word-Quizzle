@@ -313,6 +313,8 @@ public class WQClient {
 			        		        		response = (Response) Utility.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
+			        		        		if (response.getStatusCode()==StatusCodes.MATCHSTARTING)
+			        		        			Listener.setInChallenge(true);
 			        		        		
 			        		        	}
 			        		        	catch(Exception e) {
@@ -330,6 +332,7 @@ public class WQClient {
 				        		        	try {
 				        		        		
 												Listener.setChallenged(false);
+												Listener.setInChallenge(true);
 					        	            	InetAddress ip = InetAddress.getLocalHost(); 
 					        		        
 					        		    		byte[] send = command.getBytes();
@@ -344,6 +347,14 @@ public class WQClient {
 			        		        	}
 			        		        	else
 			        		        		System.out.println("\tComando non riconosciuto\n");
+			        				break;
+			        				
+			        				default:
+			        					if(Listener.isInChallenge()) {
+			        						request = new Request(usr, null, Operations.MATCH, command);
+			        						
+			        						Utility.write(socket, request);
+			        					}
 			        				break;
 		        				}
 		        			}
