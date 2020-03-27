@@ -16,14 +16,15 @@ public enum StatusCodes {
 	WRONGREQUEST("L'utente specificato non è registrato a Word Quizzle!\n"),
 	ALREADYFRIENDS("Sei già amico con questo utente!\n"),
 	USERNOTONLINE("L'utente che vuoi sfidare non risulta online!\n"),
+	USERINMATCH("L'utente che vuoi sfidare risulta già in una sfida!\n"),
 	NOTFRIENDS("Non sei amico con questo utente!\n"),
 	MATCHSTARTING("Ok, la sfida è stata accettata!\n"),
 	MATCHDECLINED("La sfida è stata declinata!\n"),
 	SELFREQUEST("Non puoi mandare una richiesta a te stesso!\n"),
-	TIMEOUT("L'avversario non ha fatto in tempo ad accettare!\n");
+	TIMEOUT("L'avversario non ha fatto in tempo ad accettare!\n"),
+	USERALREADYONLINE("Sei già loggato!\n");
 
     public final String label;
-    
     
     private StatusCodes(String label) {
         this.label = label;
