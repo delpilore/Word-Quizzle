@@ -15,5 +15,6 @@ public enum Operations {
 	FRIENDLIST,
 	CHALLENGEFRIEND,
 	SCORE,
-	RANKING
+	RANKING,
+	MATCH
 }
