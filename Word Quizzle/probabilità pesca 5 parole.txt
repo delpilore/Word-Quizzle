@@ -1,0 +1,21 @@
+0.0125
+
+0.9875
+
+(3.44*10-6)   probabilità che esca 0 volte
++
+(4.36*10^-5)  probabilità che esca 1 volta
++
+(2.75*10^-4)  probabilità che esca 2 volte
++
+0.0012        probabilità che esca 3 volte
++
+0.0037        probabilità che esca 4 volte
++
+0.01	      probabilità che esca 5 volte
+
+probabilità che esca 1 numero su 80, al massimo 5 volte su 1000 tentativi = 0.015
+probabilità che esca 1 numero su 80, ALMENO 5 volte su 1000 tentativi = 1-0.015 = 0.985 che è il 98,5%
+
+
+
