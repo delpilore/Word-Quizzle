@@ -18,6 +18,7 @@ public class User {
 	private String password;
 	private ArrayList<String> FriendList;
 	private int score;
+	private Boolean onlineState;
 
 	// User(String _username, String _password)
 	//
@@ -28,6 +29,7 @@ public class User {
 		setPassword(_password);
 		setFriendList(new ArrayList<String>());
 		setScore(0);
+		setOnlineState(false);
 	}
 		
 	// Costruttore senza argomenti (necessario per il funzionamento del pacchetto Jackson per la scrittura del file JSON)
@@ -36,6 +38,7 @@ public class User {
 		setPassword(null);
 		setFriendList(null);
 		setScore(0);
+		setOnlineState(false);
 	}
 	
 	// INIZIO Getters e Setters di tutte le variabili di stato
@@ -71,6 +74,14 @@ public class User {
 	public int getScore() {
 		return score;
 	}
+	
+	public void setOnlineState(Boolean onlineState) {
+		this.onlineState = onlineState;
+	}
+	
+	public Boolean getOnlineState() {
+		return onlineState;
+	}
 
 	// FINE Getters e Setters di tutte le variabili di stato
 	
@@ -94,4 +105,5 @@ public class User {
 	public void updateScore(int _matchscore) {
 		score = score + _matchscore;
 	}
+
 }
