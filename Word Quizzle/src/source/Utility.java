@@ -2,6 +2,7 @@ package source;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,6 +11,8 @@ import java.net.DatagramSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
+import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -122,4 +125,31 @@ public class Utility {
         } 
         return ret; 
     } 
+	
+	public static ArrayList<String> getWords() {
+		
+		File file = new File("dizionario.txt");
+		ArrayList<String> words = new ArrayList<String>() ;
+		
+		Random rand = new Random();
+		try {
+			Scanner sc = new Scanner(file,"UTF-8");
+		    while(words.size()<5)
+		    {
+		       String line = sc.nextLine();
+		       if(rand.nextInt(80) == 40)
+		          words.add(line);     
+		    }
+		     
+		    sc.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		for (String a : words)
+			System.out.println(a);
+		
+	    return words;
+	}
 }
