@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -38,6 +39,8 @@ public class Structures {
 	
 	private Hashtable<String, Integer> WordQuizzleChallengers;
 	
+	private Hashtable<String, Match> WordQuizzleMatches;
+	
 	// Structures()
 	//
 	// Il metodo costruttore è senz'altro il metodo più importante di questa classe.
@@ -54,6 +57,7 @@ public class Structures {
 		json_file = new File("WordQuizzleUsers.json");
 		activeRequests = new LinkedBlockingQueue<Socket>();
 		WordQuizzleChallengers = new Hashtable<String,Integer>();
+		WordQuizzleMatches = new Hashtable<String, Match>();
 		
 		// Istanzio l'ObjectMapper, che ci servirà per scrivere WordQuizzleUsers sul file json_file (e viceversa) 
 		// Inoltre attivo la stampa indentata su di esso (per maggiore leggibilità)
@@ -70,7 +74,12 @@ public class Structures {
 					// Recupero WordQuizzleUsers (stato precedente del server) attraverso il file json_file e
 					// stampo tutto il contenuto di essa per vedere se è consistente
 					WordQuizzleUsers = objectMapper.readValue(json_file, new TypeReference<Hashtable<String,User>>(){});
-					System.out.println("Gli utenti registrati sono: " + WordQuizzleUsers); 
+					
+					// Setto a tutti lo stato offline (è normale che non sia consistente con la precedente esecuzione)
+					Set<String> keys = WordQuizzleUsers.keySet();
+			        for(String key: keys){
+			        	WordQuizzleUsers.get(key).setOnlineState(false);
+			        }
 				}
 				else
 					System.out.println("Il file JSON esiste già ma è vuoto\n");
@@ -143,5 +152,17 @@ public class Structures {
 	
 	public Boolean containsChallenger(String _user) {
 		return WordQuizzleChallengers.containsKey(_user);
+	}
+	
+	public void addMatch(String usr, Match match) {
+		WordQuizzleMatches.put(usr,match);
+	}
+	
+	public Match getMatch(String usr) {
+		return WordQuizzleMatches.get(usr);
+	}
+	
+	public void removeMatch(String _user) {
+		WordQuizzleMatches.remove(_user);
 	}
 }
