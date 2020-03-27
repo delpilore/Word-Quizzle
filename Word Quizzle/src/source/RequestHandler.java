@@ -4,6 +4,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,6 +58,12 @@ public class RequestHandler implements Runnable {
 			        		client.close();
 						}
 						
+						else if (WordQuizzleUsers.getUser(usr).getOnlineState()) {
+							response = new Response (StatusCodes.USERALREADYONLINE);
+							Utility.write(client,response);
+			        		client.close();
+						}
+						
 						else if (!pass.equals(WordQuizzleUsers.getUser(usr).getPassword())) {
 							response = new Response (StatusCodes.WRONGPASSWORD);
 							Utility.write(client,response);
@@ -72,13 +79,13 @@ public class RequestHandler implements Runnable {
 							// listener UDP, lo aggiungo ai Challengers (è come se fosse online)
 							int port = (int) Utility.read(client);
 							WordQuizzleUsers.addChallenger(usr, port);
+							WordQuizzleUsers.getUser(usr).setOnlineState(true);
 							
 							synchronized(requestQueue) {
 								requestQueue.add(client);
 								requestQueue.notify();
 							}
 							
-							WordQuizzleUsers.writeJson();
 						}
 					
 		        	break;
@@ -86,13 +93,13 @@ public class RequestHandler implements Runnable {
 					case LOGOUT:
 	
 						response = new Response (StatusCodes.OK);
-						// Tolgo anche l'occorrenza dalla tabella in Structures in modo da renderlo "offline"
+						// Tolgo anche l'occorrenza dalla tabella dei challengers
 						WordQuizzleUsers.removeChallenger(usr);
+						WordQuizzleUsers.getUser(usr).setOnlineState(false);
+						
 						Utility.write(client,response);
 		        		
 		        		client.close();
-		        		
-		        		WordQuizzleUsers.writeJson();
 		        		
 		        	break;
 		        	
@@ -168,8 +175,12 @@ public class RequestHandler implements Runnable {
 							response = new Response (StatusCodes.WRONGREQUEST);
 							Utility.write(client,response);
 						}
-						else if (!WordQuizzleUsers.containsChallenger(message)) {
+						else if (!WordQuizzleUsers.getUser(message).getOnlineState()) {
 							response = new Response (StatusCodes.USERNOTONLINE);
+							Utility.write(client,response);
+						}
+						else if (!WordQuizzleUsers.containsChallenger(message)) {
+							response = new Response (StatusCodes.USERINMATCH);
 							Utility.write(client,response);
 						}
 						else if (usr.equals(message)){
@@ -181,6 +192,9 @@ public class RequestHandler implements Runnable {
 							Utility.write(client,response);
 						}	
 						else {
+							
+							ArrayList<String> selectedWords = Utility.getWords();
+							
 							byte buf[] = usr.getBytes();
 							byte[] receive = new byte[100]; 
 							
@@ -192,10 +206,19 @@ public class RequestHandler implements Runnable {
 							
 							ds.send(DpSend); 
 				            ds.receive(DpReceive);
-				            
+
 				            if(Utility.data(receive).toString().equals("y")) {
 								response = new Response (StatusCodes.MATCHSTARTING);
 								Utility.write(client,response);
+								
+								Match match = new Match(usr,message,WordQuizzleUsers);
+								match.fetchTraductions(selectedWords);
+								
+								WordQuizzleUsers.addMatch(usr, match);
+								WordQuizzleUsers.addMatch(message, match);
+								
+								WordQuizzleUsers.removeChallenger(usr);
+								WordQuizzleUsers.removeChallenger(message);
 				            }
 				            else if (Utility.data(receive).toString().equals("n")){
 								response = new Response (StatusCodes.MATCHDECLINED);
@@ -215,6 +238,23 @@ public class RequestHandler implements Runnable {
 							requestQueue.notify();
 						}
 					
+					break;
+					
+					case MATCH:
+						
+						Match match = WordQuizzleUsers.getMatch(usr);
+						if(!match.sendNextWord(usr,message)) {
+							WordQuizzleUsers.addChallenger(match.getFirstOpponent(), match.getFirstOpponentUDPPort());
+							WordQuizzleUsers.addChallenger(match.getSecondOpponent(), match.getSecondOpponentUDPPort());
+							
+							WordQuizzleUsers.removeMatch(usr);
+							WordQuizzleUsers.removeMatch(message);
+						}
+						
+						synchronized(requestQueue) {
+							requestQueue.add(client);
+							requestQueue.notify();
+						}
 					break;
 		        	
 				default:
