@@ -338,6 +338,8 @@ public class WQClient {
 				        		        	try {
 				        		        		
 												Listener.setChallenged(false);
+												
+												// CORRETTO QUI
 												if (command.equals("y"))
 													Listener.setInChallenge(true);
 					        	            	InetAddress ip = InetAddress.getLocalHost(); 
