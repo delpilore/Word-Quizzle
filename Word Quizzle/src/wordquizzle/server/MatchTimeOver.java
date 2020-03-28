@@ -77,6 +77,6 @@ public class MatchTimeOver extends TimerTask {
 		currentMatches.removeMatch(match.getFirstOpponent());
 		currentMatches.removeMatch(match.getSecondOpponent());
 		
-		//devo anche updatare il punteggio
+		//devo anche updatare il punteggioooo
 	}
 }
