@@ -38,12 +38,9 @@ public class Listener implements Runnable {
 				Socket client = server.accept();
 				System.out.println("Accettato client: " + client);
 				
-				// Metto nella LinkedBlockingQueue condivisa la socket del client accettato, le cui richieste
-				// saranno gestite da una pool di thread (come detto sopra)
-				synchronized(activeRequests) {
-					activeRequests.add(client);
-					activeRequests.notify();
-				}
+				client.setSoTimeout(100);
+				activeRequests.offer(client);
+
 			}
 		}
 		catch(Exception e) {

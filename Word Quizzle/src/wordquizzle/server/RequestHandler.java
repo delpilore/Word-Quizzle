@@ -1,9 +1,12 @@
 package wordquizzle.server;
 
+import java.io.BufferedInputStream;
+import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -42,22 +45,12 @@ public class RequestHandler implements Runnable {
 		
 		while(true) {
 			
-			synchronized(activeRequests) {
-				while(activeRequests.isEmpty()) {
-					try {
-						activeRequests.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			
-			client = activeRequests.poll();
-			
-			try {
+			try {		
+				client = activeRequests.take();
 				
-				request = (Request) Comunication.read(client);
-				
+				ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
+				request = (Request) reader.readObject();
+
 				String usr = request.getRequestUsername();
 				String pass = request.getRequestPassword();
 				String message = request.getRequestMessage();
@@ -94,11 +87,7 @@ public class RequestHandler implements Runnable {
 							challengeableUsers.addChallenger(usr, port);
 							registeredUsers.getUser(usr).setOnlineState(true);
 							
-							synchronized(activeRequests) {
-								activeRequests.add(client);
-								activeRequests.notify();
-							}
-							
+							activeRequests.offer(client);
 						}
 					
 		        	break;
@@ -140,10 +129,8 @@ public class RequestHandler implements Runnable {
 							registeredUsers.writeJson();
 						}
 						
-						synchronized(activeRequests) {
-							activeRequests.add(client);
-							activeRequests.notify();
-						}
+						activeRequests.offer(client);
+						
 		        	break;
 		        	
 					case FRIENDLIST:
@@ -153,20 +140,15 @@ public class RequestHandler implements Runnable {
 						
 						Comunication.write(client,array);
 						
-						synchronized(activeRequests) {
-							activeRequests.add(client);
-							activeRequests.notify();
-						}
+						activeRequests.offer(client);
+						
 		        	break;
 		        	
 					case SCORE:
 						
 						Comunication.write(client,registeredUsers.getUser(usr).getScore());
 						
-						synchronized(activeRequests) {
-							activeRequests.add(client);
-							activeRequests.notify();
-						}
+						activeRequests.offer(client);
 					
 					break;
 					
@@ -176,10 +158,7 @@ public class RequestHandler implements Runnable {
 						
 						Comunication.write(client,rankingTable);
 						
-						synchronized(activeRequests) {
-							activeRequests.add(client);
-							activeRequests.notify();
-						}
+						activeRequests.offer(client);
 		        	break;
 		        	
 					case CHALLENGEFRIEND:
@@ -188,6 +167,10 @@ public class RequestHandler implements Runnable {
 							response = new Response (StatusCodes.WRONGREQUEST);
 							Comunication.write(client,response);
 						}
+						else if (!registeredUsers.getUser(message).isFriend(usr)){
+							response = new Response (StatusCodes.NOTFRIENDS);
+							Comunication.write(client,response);
+						}	
 						else if (!registeredUsers.getUser(message).getOnlineState()) {
 							response = new Response (StatusCodes.USERNOTONLINE);
 							Comunication.write(client,response);
@@ -200,10 +183,6 @@ public class RequestHandler implements Runnable {
 							response = new Response (StatusCodes.SELFREQUEST);
 							Comunication.write(client,response);
 						}
-						else if (!registeredUsers.getUser(message).isFriend(usr)){
-							response = new Response (StatusCodes.NOTFRIENDS);
-							Comunication.write(client,response);
-						}	
 						else {
 							
 							ArrayList<String> selectedWords = ServerUtilities.getWords();
@@ -246,10 +225,7 @@ public class RequestHandler implements Runnable {
 				            	
 						}
 						
-						synchronized(activeRequests) {
-							activeRequests.add(client);
-							activeRequests.notify();
-						}
+						activeRequests.offer(client);
 					
 					break;
 					
@@ -282,16 +258,16 @@ public class RequestHandler implements Runnable {
 							currentMatches.removeMatch(message);
 						}
 						
-						synchronized(activeRequests) {
-							activeRequests.add(client);
-							activeRequests.notify();
-						}
+						activeRequests.offer(client);
 					break;
 		        	
 				default:
 					break;
 					        
 				}
+			}
+			catch(SocketTimeoutException e1) {
+				activeRequests.offer(client);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
