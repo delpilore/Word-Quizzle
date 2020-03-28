@@ -338,7 +338,8 @@ public class WQClient {
 				        		        	try {
 				        		        		
 												Listener.setChallenged(false);
-												Listener.setInChallenge(true);
+												if (command.equals("y"))
+													Listener.setInChallenge(true);
 					        	            	InetAddress ip = InetAddress.getLocalHost(); 
 					        		        
 					        		    		byte[] send = command.getBytes();
