@@ -36,5 +36,4 @@ public class Comunication {
 		}
 		return null;
 	}
-	
 }
