@@ -46,6 +46,12 @@ public class ChallengeListener implements Runnable {
 	            	else {
 	            		System.out.println("PARITA FINITA!");
 	            		setInChallenge(false);
+	            		
+	    	        	byte[] result = new byte[10000]; 
+	    	            DatagramPacket UDPPackResult = new DatagramPacket(result, result.length); 
+	    	            UDPSocket.receive(UDPPackResult);
+	    	            
+	    	            System.out.println(GeneralUtilities.data(result).toString());
 	            	}
 	            }
 	        }

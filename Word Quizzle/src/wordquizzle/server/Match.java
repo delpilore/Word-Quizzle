@@ -23,6 +23,7 @@ public class Match {
 	private int firstOpponentCorrect;
 	private int firstOpponentIncorrect;
 	private int firstOpponentNotGiven;
+	private Boolean firstOpponentEnd;
 
 	private User secondOpponent;
 	private int secondOpponentUDPPort;
@@ -30,10 +31,11 @@ public class Match {
 	private int secondOpponentCorrect;
 	private int secondOpponentIncorrect;
 	private int secondOpponentNotGiven;
+	private Boolean secondOpponentEnd;
 	
 	private Hashtable<String,String> wordsTraduction;
 	private ArrayList<String> words;
-
+    
 	public Match(User _firstOpponent, int _firstOpponentUDPPort, User _secondOpponent, int _secondOpponentUDPPort ) {
 		
 		firstOpponent = _firstOpponent;
@@ -42,6 +44,7 @@ public class Match {
 		firstOpponentCorrect=0;
 		firstOpponentIncorrect=0;
 		firstOpponentNotGiven=5;
+		firstOpponentEnd=false;
 
 		secondOpponent = _secondOpponent;
 		secondOpponentUDPPort = _secondOpponentUDPPort;
@@ -49,6 +52,7 @@ public class Match {
 		secondOpponentCorrect=0;
 		secondOpponentIncorrect=0;
 		secondOpponentNotGiven=5;
+		secondOpponentEnd=false;
 		
 		wordsTraduction = new Hashtable<String,String>();
 	}
@@ -89,7 +93,9 @@ public class Match {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	public void beginMatch() {
 		try {
 			byte buf[] = words.get(0).getBytes();
 			
@@ -107,10 +113,9 @@ public class Match {
 		catch(Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 	
-	public Boolean sendNextWord(String usr, String _word) {
+	public void sendNextWord(String usr, String _word) {
 		
 		if(usr.equals(firstOpponent.getUsername())) {
 
@@ -126,23 +131,9 @@ public class Match {
 			firstOpponentWord++;
 			
 			if(firstOpponentWord==5) {
-				try {
-					String fine = "FINE";
-					byte buf[] = fine.getBytes();
-					
-					InetAddress ip = InetAddress.getLocalHost(); 
-					DatagramSocket ds = new DatagramSocket();
-					
-					DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, firstOpponentUDPPort); 
-		 
-					ds.send(DpSend); 
-					
-					ds.close();
-				}
-				catch(Exception e) {
-					e.printStackTrace();
-				}
-				return false;
+				endMatch(firstOpponentUDPPort);
+				firstOpponentEnd = true;
+				return;
 			}
 				
 			byte buf[] = words.get(firstOpponentWord).getBytes();
@@ -160,13 +151,10 @@ public class Match {
 			catch(Exception e) {
 				e.printStackTrace();
 			}
-			
-			return true;
 		}
 
 		else {
-			
-			
+
 			if (_word.equals(wordsTraduction.get(words.get(secondOpponentWord)))) {
 				secondOpponentCorrect = getSecondOpponentCorrect() + 1;
 				secondOpponentNotGiven = getSecondOpponentNotGiven() - 1;
@@ -179,23 +167,9 @@ public class Match {
 			secondOpponentWord++;
 			
 			if(secondOpponentWord==5) {
-				try {
-					String fine = "FINE";
-					byte buf[] = fine.getBytes();
-					
-					InetAddress ip = InetAddress.getLocalHost(); 
-					DatagramSocket ds = new DatagramSocket();
-					
-					DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, secondOpponentUDPPort); 
-		 
-					ds.send(DpSend); 
-					
-					ds.close();
-				}
-				catch(Exception e) {
-					e.printStackTrace();
-				}
-				return false;
+				endMatch(secondOpponentUDPPort);
+				secondOpponentEnd=true;
+				return;
 			}
 			
 			byte buf[] = words.get(secondOpponentWord).getBytes();
@@ -213,10 +187,36 @@ public class Match {
 			catch(Exception e) {
 				e.printStackTrace();
 			}
-			return true;
 		}		
 	}
+	
+	
+	
+	
+	
+	public void endMatch(int port) {
+		try {
+			String fine = "FINE";
+			byte buf[] = fine.getBytes();
+			
+			InetAddress ip = InetAddress.getLocalHost(); 
+			DatagramSocket ds = new DatagramSocket();
+			
+			DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, port); 
+ 
+			ds.send(DpSend); 
+			
+			ds.close();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 
+	
+	
+	
 	public String getFirstOpponent() {
 		return firstOpponent.getUsername();
 	}
@@ -255,6 +255,14 @@ public class Match {
 
 	public int getSecondOpponentNotGiven() {
 		return secondOpponentNotGiven;
+	}
+
+	public Boolean getFirstOpponentEnd() {
+		return firstOpponentEnd;
+	}
+
+	public Boolean getSecondOpponentEnd() {
+		return secondOpponentEnd;
 	}
 	
 }

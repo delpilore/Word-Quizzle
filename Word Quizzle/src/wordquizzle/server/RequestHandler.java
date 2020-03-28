@@ -8,6 +8,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -211,6 +213,12 @@ public class RequestHandler implements Runnable {
 								
 								challengeableUsers.removeChallenger(usr);
 								challengeableUsers.removeChallenger(message);
+								
+								Timer timer = new Timer();
+								TimerTask task = new MatchTimeOver(currentMatches, match, challengeableUsers);
+								
+								match.beginMatch();
+								timer.schedule( task, 30000 );
 				            }
 				            else if (GeneralUtilities.data(receive).toString().equals("n")){
 								response = new Response (StatusCodes.MATCHDECLINED);
@@ -232,33 +240,10 @@ public class RequestHandler implements Runnable {
 					case MATCH:
 						
 						Match match = currentMatches.getMatch(usr);
-						if(!match.sendNextWord(usr,message)) {
-							String result;
-							if(usr.equals(match.getFirstOpponent())) {
-								result = new String("Hai tradotto correttamente " + match.getFirstOpponentCorrect() + 
-												 " parole/a, ne hai sbagliate/a " + match.getFirstOpponentIncorrect() + 
-															 " e non risposto a " + match.getFirstOpponentNotGiven());
-								
-								registeredUsers.getUser(usr).updateScore((2)*match.getFirstOpponentCorrect() + (-1)* match.getFirstOpponentIncorrect());
-							}
-							else {
-								result= new String("Hai tradotto correttamente " + match.getSecondOpponentCorrect() + 
-												" parole/a, ne hai sbagliate/a " + match.getSecondOpponentIncorrect() + 
-															" e non risposto a " + match.getSecondOpponentNotGiven());
-								
-								registeredUsers.getUser(usr).updateScore((2)*match.getSecondOpponentCorrect() + (-1)* match.getSecondOpponentIncorrect());
-							}
-							
-							Comunication.write(client,result);
-							
-							challengeableUsers.addChallenger(match.getFirstOpponent(), match.getFirstOpponentUDPPort());
-							challengeableUsers.addChallenger(match.getSecondOpponent(), match.getSecondOpponentUDPPort());
-							
-							currentMatches.removeMatch(usr);
-							currentMatches.removeMatch(message);
-						}
-						
+						match.sendNextWord(usr,message);
+
 						activeRequests.offer(client);
+						
 					break;
 		        	
 				default:
