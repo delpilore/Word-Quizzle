@@ -1,4 +1,4 @@
-package source;
+package wordquizzle.client;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -6,9 +6,9 @@ import java.util.TimerTask;
 
 public class OutOfTime extends TimerTask {
 	
-	ClientChallengeListener Listener;
+	ChallengeListener Listener;
 	
-	public OutOfTime(ClientChallengeListener _listener) {
+	public OutOfTime(ChallengeListener _listener) {
 		Listener = _listener;
 	}
 	

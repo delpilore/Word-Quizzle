@@ -1,11 +1,13 @@
-package source;
+package wordquizzle.client;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ClientChallengeListener implements Runnable {
+import wordquizzle.GeneralUtilities;
+
+public class ChallengeListener implements Runnable {
 	
 	private DatagramSocket UDPSocket;
 	private DatagramPacket UDPPackReceive = null;
@@ -14,7 +16,7 @@ public class ClientChallengeListener implements Runnable {
 	private Boolean challenged = false;
 	private Boolean inChallenge = false;
 
-	public ClientChallengeListener(int _port) {
+	public ChallengeListener(int _port) {
 		myUDPPort = _port;
 	}
 	
@@ -27,7 +29,7 @@ public class ClientChallengeListener implements Runnable {
 	            UDPSocket.receive(UDPPackReceive);
 	            
 	            if(inChallenge==false) {
-		            System.out.println("\n" + Utility.data(receive).toString() + " ti ha sfidato! Accetti?");
+		            System.out.println("\n" + GeneralUtilities.data(receive).toString() + " ti ha sfidato! Accetti?");
 		            System.out.println("\ty: accetta");
 		            System.out.println("\tn: rifiuta");
 	
@@ -39,8 +41,8 @@ public class ClientChallengeListener implements Runnable {
 		            timer.schedule( task, 5000 );
 	            }
 	            else {
-	            	if(!Utility.data(receive).toString().equals("FINE"))
-	            		System.out.println("\n Ecco la parola: " + Utility.data(receive).toString());
+	            	if(!GeneralUtilities.data(receive).toString().equals("FINE"))
+	            		System.out.println("\n Ecco la parola: " + GeneralUtilities.data(receive).toString());
 	            	else {
 	            		System.out.println("PARITA FINITA!");
 	            		setInChallenge(false);

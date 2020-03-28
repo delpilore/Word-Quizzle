@@ -1,4 +1,4 @@
-package source;
+package wordquizzle.server;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,11 +21,11 @@ public class Listener implements Runnable {
 	// condivisa con gli altri thread del server e passata come argomento al costruttore in fase di istanziazione.
 	private int myTCPPort = 16000;
 	private ServerSocket server = null;																
-	private LinkedBlockingQueue<Socket> queue;
+	private LinkedBlockingQueue<Socket> activeRequests;
 	
 	// Costruttore a cui viene passato il riferimento alla LinkedBlockingQueue condivisa
-	public Listener (LinkedBlockingQueue<Socket> _queue) {
-		queue = _queue;
+	public Listener (LinkedBlockingQueue<Socket> _activeRequests) {
+		activeRequests = _activeRequests;
 	}
 	
 	// Task eseguito dal thread
@@ -40,9 +40,9 @@ public class Listener implements Runnable {
 				
 				// Metto nella LinkedBlockingQueue condivisa la socket del client accettato, le cui richieste
 				// saranno gestite da una pool di thread (come detto sopra)
-				synchronized(queue) {
-					queue.add(client);
-					queue.notify();
+				synchronized(activeRequests) {
+					activeRequests.add(client);
+					activeRequests.notify();
 				}
 			}
 		}

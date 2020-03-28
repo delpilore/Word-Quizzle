@@ -1,11 +1,18 @@
-package source;
+package wordquizzle.server;
 
+import java.net.Socket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import wordquizzle.RegisterInterface;
+import wordquizzle.server.structures.ChallengeableUsers;
+import wordquizzle.server.structures.CurrentMatches;
+import wordquizzle.server.structures.RegisteredUsers;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
@@ -24,8 +31,12 @@ public class WQServer {
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		// Oggetto Structures istanziato una sola volta e condiviso tra tutti i Thread del server (vedere "Structures")
-		Structures WordQuizzleSupport = new Structures();
+		RegisteredUsers registeredUsers = new RegisteredUsers();
+		ChallengeableUsers challengeableUsers = new ChallengeableUsers();
+		CurrentMatches currentMatches = new CurrentMatches();
+		LinkedBlockingQueue<Socket> activeRequests = new LinkedBlockingQueue<Socket>();
+		
+		registeredUsers.fetchPreviousState();
 		
 		// Rispettivamente: numero di thread worker attivati, porta associata al servizio registrazione in RMI, oggetto
 		// da esportare non ancora istanziato.
@@ -35,7 +46,7 @@ public class WQServer {
 		
 		// Esportazione dell'oggetto che realizza l'operazione di registrazione
 		try {
-			register = new RegisterImpl(WordQuizzleSupport);
+			register = new RegisterImpl(registeredUsers);
 			RegisterInterface stub = (RegisterInterface) UnicastRemoteObject.exportObject(register, 0);
 
 			LocateRegistry.createRegistry(myRMIPort);
@@ -55,12 +66,12 @@ public class WQServer {
 		// Il Listener la utilizzerà per accodare le socket dei client accettati (vedere "Listener")
 		// che verranno poi gestiti dai Worker. (ricordiamo che l'unico oggetto Structures, è condiviso tra
 		// tutti i thread del server)
-		Listener listener = new Listener(WordQuizzleSupport.getRequestsQueue());
+		Listener listener = new Listener(activeRequests);
 		Thread Welcome = new Thread(listener);
 		Welcome.start();
 		
 		// Faccio partire i Thread Worker che eseguiranno il task "RequestHandler"
 		for (int i=0; i<NWORKERS; i++)
-			poolWorker.execute(new RequestHandler(WordQuizzleSupport));		
+			poolWorker.execute(new RequestHandler(registeredUsers, challengeableUsers, currentMatches, activeRequests));		
 	}	
 }

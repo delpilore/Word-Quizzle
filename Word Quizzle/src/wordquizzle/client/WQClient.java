@@ -1,4 +1,4 @@
-package source;
+package wordquizzle.client;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -11,9 +11,15 @@ import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import source.RegisterInterface.UserAlreadyRegisteredException;
-import source.RegisterInterface.UsernameTooShortException;
-import source.RegisterInterface.WeakPasswordException;
+import wordquizzle.Operations;
+import wordquizzle.RegisterInterface;
+import wordquizzle.Request;
+import wordquizzle.Response;
+import wordquizzle.StatusCodes;
+import wordquizzle.RegisterInterface.UserAlreadyRegisteredException;
+import wordquizzle.RegisterInterface.UsernameTooShortException;
+import wordquizzle.RegisterInterface.WeakPasswordException;
+import wordquizzle.Comunication;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
@@ -29,6 +35,7 @@ public class WQClient {
 	public static void main(String[] args) {
 		
         String usr, pass;
+        int cont = 0;
 		
 		Remote remoteObject;
 		RegisterInterface serverObject;
@@ -44,13 +51,13 @@ public class WQClient {
 		String hostname = "localhost"; 
 		int serverTCPPort = 16000;
 		int serverRMIPort = 15000;
-		int myUDPPort = Utility.portScanner(); // la porta UDP dove il thread per accettazione richieste di sfida ascolterà
+		int myUDPPort = ClientUtilities.portScanner(); // la porta UDP dove il thread per accettazione richieste di sfida ascolterà
 		
 		System.out.print("Benvenuto/a in Word Quizzle!\n");
 		System.out.println("\tAvvio thread per accettazione richieste di sfida...");
 		 
 		// Thread per accettazione richieste di sfida
-		ClientChallengeListener Listener = new ClientChallengeListener(myUDPPort);
+		ChallengeListener Listener = new ChallengeListener(myUDPPort);
 		Thread Acceptor = new Thread(Listener);
 		Acceptor.start();
 		System.out.println("\tThread Attivato!");
@@ -118,8 +125,8 @@ public class WQClient {
 		        		System.out.print("\tTentativo di connessione...\n");
 		        		socket = new Socket(hostname, serverTCPPort);
 		        		
-		        		Utility.write(socket, request);
-		        		response = (Response) Utility.read(socket);
+		        		Comunication.write(socket, request);
+		        		response = (Response) Comunication.read(socket);
 		        	}
 		        	catch (Exception e) {
 			        	e.printStackTrace(); 
@@ -132,7 +139,7 @@ public class WQClient {
 	        				System.out.print("\n\tSei loggato!\n");
 	        				
 	        				// Scrivo al server la porta UDP selezionata su cui il Listener per le sfide ascolterà
-	        				Utility.write(socket, myUDPPort);
+	        				Comunication.write(socket, myUDPPort);
 	        				
 	        				System.out.print("\t-----------------\n");
   				
@@ -169,8 +176,8 @@ public class WQClient {
 			        		        	
 			        		        	try {
 	
-				        		            Utility.write(socket,request);
-			        		        		response = (Response) Utility.read(socket);
+			        		        		Comunication.write(socket,request);
+			        		        		response = (Response) Comunication.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
 			        		        		
@@ -195,8 +202,8 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-				        		            Utility.write(socket,request);
-			        		        		response = (Response) Utility.read(socket);
+			        		        		Comunication.write(socket,request);
+			        		        		response = (Response) Comunication.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
 			        		        		
@@ -217,9 +224,9 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-				        		            Utility.write(socket,request);
+			        		        		Comunication.write(socket,request);
 				        		            
-				        		            JsonNode json = (JsonNode) Utility.read(socket);
+				        		            JsonNode json = (JsonNode) Comunication.read(socket);
 				        		            
 				        		            if (json.isEmpty()){
 				        		            	System.out.print("\tLa tua lista amici è vuota!\n");
@@ -249,8 +256,8 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-				        		            Utility.write(socket,request);
-			        		        		int score = (int) Utility.read(socket);
+			        		        		Comunication.write(socket,request);
+			        		        		int score = (int) Comunication.read(socket);
 			        		        		
 			        		        		System.out.print("\tIl tuo punteggio è: " + score + "\n");
 			        		        		
@@ -273,9 +280,9 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-				        		            Utility.write(socket,request);
+			        		        		Comunication.write(socket,request);
 				        		            
-				        		            JsonNode json = (JsonNode) Utility.read(socket);
+				        		            JsonNode json = (JsonNode) Comunication.read(socket);
 				        		            
 				        		            if (json.isEmpty()){
 				        		            	System.out.print("\tLa tua lista amici è vuota!\n");
@@ -309,8 +316,8 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-				        		            Utility.write(socket,request);
-			        		        		response = (Response) Utility.read(socket);
+			        		        		Comunication.write(socket,request);
+			        		        		response = (Response) Comunication.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
 			        		        		if (response.getStatusCode()==StatusCodes.MATCHSTARTING)
@@ -351,9 +358,17 @@ public class WQClient {
 			        				
 			        				default:
 			        					if(Listener.isInChallenge()) {
-			        						request = new Request(usr, null, Operations.MATCH, command);
-			        						
-			        						Utility.write(socket, request);
+			        						cont++;
+			        						if(cont == 5) {
+			        							request = new Request(usr, null, Operations.MATCH, command);
+			        							Comunication.write(socket, request);
+			        							String matchresult = (String) Comunication.read(socket);
+			        							System.out.println("\n" + matchresult);
+			        						}
+			        						else {
+			        							request = new Request(usr, null, Operations.MATCH, command);
+			        							Comunication.write(socket, request);
+			        						}		
 			        					}
 			        				break;
 		        				}

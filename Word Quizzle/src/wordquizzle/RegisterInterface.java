@@ -1,4 +1,4 @@
-package source;
+package wordquizzle;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

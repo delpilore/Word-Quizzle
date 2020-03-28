@@ -1,4 +1,4 @@
-package source;
+package wordquizzle.server;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -17,29 +17,39 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Match {
 
-	private String firstOpponent;
+	private User firstOpponent;
 	private int firstOpponentUDPPort;
 	private int firstOpponentWord;
+	private int firstOpponentCorrect;
+	private int firstOpponentIncorrect;
+	private int firstOpponentNotGiven;
 
-	private String secondOpponent;
+	private User secondOpponent;
 	private int secondOpponentUDPPort;
 	private int secondOpponentWord;
+	private int secondOpponentCorrect;
+	private int secondOpponentIncorrect;
+	private int secondOpponentNotGiven;
+	
 	private Hashtable<String,String> wordsTraduction;
 	private ArrayList<String> words;
-	
-	private Structures support;
-	
-	public Match(String opp1, String opp2, Structures _support) {
-		firstOpponent = opp1;
-		secondOpponent = opp2;
+
+	public Match(User _firstOpponent, int _firstOpponentUDPPort, User _secondOpponent, int _secondOpponentUDPPort ) {
 		
-		support = _support;
-	
-		firstOpponentUDPPort = support.getChallenger(firstOpponent);
-		secondOpponentUDPPort = support.getChallenger(secondOpponent);
-		
+		firstOpponent = _firstOpponent;
+		firstOpponentUDPPort = _firstOpponentUDPPort;
 		firstOpponentWord=0;
+		firstOpponentCorrect=0;
+		firstOpponentIncorrect=0;
+		firstOpponentNotGiven=5;
+
+		secondOpponent = _secondOpponent;
+		secondOpponentUDPPort = _secondOpponentUDPPort;
 		secondOpponentWord=0;
+		secondOpponentCorrect=0;
+		secondOpponentIncorrect=0;
+		secondOpponentNotGiven=5;
+		
 		wordsTraduction = new Hashtable<String,String>();
 	}
 	
@@ -102,9 +112,19 @@ public class Match {
 	
 	public Boolean sendNextWord(String usr, String _word) {
 		
-		if(usr.equals(firstOpponent)) {
-			
+		if(usr.equals(firstOpponent.getUsername())) {
+
+			if (_word.equals(wordsTraduction.get(words.get(firstOpponentWord)))) {
+				firstOpponentCorrect = getFirstOpponentCorrect() + 1;
+				firstOpponentNotGiven = getFirstOpponentNotGiven() - 1;
+			}
+			else {
+				firstOpponentIncorrect = getFirstOpponentIncorrect() + 1;
+				firstOpponentNotGiven = getFirstOpponentNotGiven() - 1;
+			}
+						
 			firstOpponentWord++;
+			
 			if(firstOpponentWord==5) {
 				try {
 					String fine = "FINE";
@@ -124,9 +144,6 @@ public class Match {
 				}
 				return false;
 			}
-			
-			if (_word.equals(wordsTraduction.get(words.get(firstOpponentWord-1))))
-					support.getUser(firstOpponent).updateScore(3);
 				
 			byte buf[] = words.get(firstOpponentWord).getBytes();
 			
@@ -146,11 +163,21 @@ public class Match {
 			
 			return true;
 		}
-		
-		
+
 		else {
 			
+			
+			if (_word.equals(wordsTraduction.get(words.get(secondOpponentWord)))) {
+				secondOpponentCorrect = getSecondOpponentCorrect() + 1;
+				secondOpponentNotGiven = getSecondOpponentNotGiven() - 1;
+			}
+			else {
+				secondOpponentIncorrect = getSecondOpponentIncorrect() + 1;
+				secondOpponentNotGiven = getSecondOpponentNotGiven() - 1;
+			}
+			
 			secondOpponentWord++;
+			
 			if(secondOpponentWord==5) {
 				try {
 					String fine = "FINE";
@@ -170,9 +197,6 @@ public class Match {
 				}
 				return false;
 			}
-			
-			if (_word.equals(wordsTraduction.get(words.get(secondOpponentWord-1))))
-				support.getUser(secondOpponent).updateScore(3);
 			
 			byte buf[] = words.get(secondOpponentWord).getBytes();
 			
@@ -194,7 +218,7 @@ public class Match {
 	}
 
 	public String getFirstOpponent() {
-		return firstOpponent;
+		return firstOpponent.getUsername();
 	}
 
 	public int getFirstOpponentUDPPort() {
@@ -202,11 +226,35 @@ public class Match {
 	}
 
 	public String getSecondOpponent() {
-		return secondOpponent;
+		return secondOpponent.getUsername();
 	}
 
 	public int getSecondOpponentUDPPort() {
 		return secondOpponentUDPPort;
+	}
+
+	public int getFirstOpponentCorrect() {
+		return firstOpponentCorrect;
+	}
+
+	public int getFirstOpponentIncorrect() {
+		return firstOpponentIncorrect;
+	}
+
+	public int getFirstOpponentNotGiven() {
+		return firstOpponentNotGiven;
+	}
+
+	public int getSecondOpponentCorrect() {
+		return secondOpponentCorrect;
+	}
+
+	public int getSecondOpponentIncorrect() {
+		return secondOpponentIncorrect;
+	}
+
+	public int getSecondOpponentNotGiven() {
+		return secondOpponentNotGiven;
 	}
 	
 }

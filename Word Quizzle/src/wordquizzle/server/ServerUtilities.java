@@ -1,14 +1,6 @@
-package source;
+package wordquizzle.server;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.BindException;
-import java.net.DatagramSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -18,45 +10,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import wordquizzle.server.structures.RegisteredUsers;
+
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
-/*
-* UTILITY 
-* 
-* Questa classe si limita a contenere metodi utili al funzionamento del server.
-* Perlopiù si tratta di metodi che risulterebbero "pesanti" da vedere ripetuti, o soltanto scritti,
-* nel codice effettivo del server.
-*/
 
-public class Utility {
-	
-	// write(Socket receiver, Object message)
-	//
-	// Questo metodo racchiude tutto il necessario per spedire un oggetto su una socket.
-	// Viene usato sia da Client che da Server.
-	public static void write(Socket receiver, Object message) {
-		try {
-			ObjectOutputStream writer = new ObjectOutputStream(new BufferedOutputStream(receiver.getOutputStream()));
-			writer.writeObject(message);
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	// read()
-	//
-	// Questo metodo racchiude tutto il necessario per leggere un oggetto da una socket.
-	// Viene usato sia da Client che da Server.
-	public static Object read(Socket sender) {
-		try {
-			ObjectInputStream reader = new ObjectInputStream(new BufferedInputStream(sender.getInputStream()));
-			return reader.readObject();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+public class ServerUtilities {
 	
 	// getRanking(Structures _support, String usr)
 	//
@@ -68,19 +27,19 @@ public class Utility {
 	// 		user2: score2
 	// 		ecc..
 	//	}
-	public static JsonNode getRanking(Structures _support, String usr) {
+	public static JsonNode getRanking(RegisteredUsers registeredUsers, String usr) {
 		
 		// ArrayList per la classifica
 		ArrayList<User> Ranking = new ArrayList<User>();
 		// ArrayList delle amicizie di usr
-		ArrayList<String> friendList = _support.getUser(usr).getFriendList();
+		ArrayList<String> friendList = registeredUsers.getUser(usr).getFriendList();
 		
 		// Inizio aggiungendo usr alla classifica "Ranking"
-		Ranking.add(_support.getUser(usr));
+		Ranking.add(registeredUsers.getUser(usr));
 		
 		// Segue l'aggiunta di tutti gli amici di usr alla classifica "Ranking"
 		for (String friend : friendList) {
-			Ranking.add(_support.getUser(friend));
+			Ranking.add(registeredUsers.getUser(friend));
 		}
 		
 		// Viene ordinata la classifica "Ranking" attraverso il metodo sort e il comparatore ScoreComparator (vedere file relativo)
@@ -97,34 +56,6 @@ public class Utility {
 		return rankingTable;
 	}
 	
-	public static int portScanner() {
-		for (int i=1024; i<49151; i++){
-			try (DatagramSocket s =new DatagramSocket(i)){ 
-				return i;
-			}
-			catch (BindException e) {
-				;
-			}
-			catch (Exception e) {
-				System.out.println (e);
-			}
-		} 
-		return 0;
-	}
-	
-	public static StringBuilder data(byte[] a) 
-    { 
-        if (a == null) 
-            return null; 
-        StringBuilder ret = new StringBuilder(); 
-        int i = 0; 
-        while (a[i] != 0) 
-        { 
-            ret.append((char) a[i]); 
-            i++; 
-        } 
-        return ret; 
-    } 
 	
 	public static ArrayList<String> getWords() {
 		
@@ -152,4 +83,5 @@ public class Utility {
 		
 	    return words;
 	}
+	
 }

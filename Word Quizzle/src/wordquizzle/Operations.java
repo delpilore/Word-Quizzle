@@ -1,4 +1,4 @@
-package source;
+package wordquizzle;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 

@@ -1,7 +1,10 @@
-package source;
+package wordquizzle.server;
 
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;
+
+import wordquizzle.RegisterInterface;
+import wordquizzle.server.structures.RegisteredUsers;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
@@ -17,10 +20,10 @@ public class RegisterImpl extends RemoteServer implements RegisterInterface {
 	
 	// Da costruttore gli viene passato l'unico oggetto Structures del server, contenente, tra le altre,
 	// la HashTable che mappa gli utenti registrati al servizio.
-	private Structures WordQuizzleUsers;
+	private RegisteredUsers registeredUsers;
 	
-	public RegisterImpl(Structures _support) throws RemoteException {
-		WordQuizzleUsers = _support;
+	public RegisterImpl(RegisteredUsers _registeredUsers) throws RemoteException {
+		registeredUsers = _registeredUsers;
 	}
 	
 	// registra_utente(String nickUtente, String password)
@@ -42,7 +45,7 @@ public class RegisterImpl extends RemoteServer implements RegisterInterface {
 		if (nickUtente.length()<3)
 			throw new UsernameTooShortException();
 		
-		if (WordQuizzleUsers.containsUser(nickUtente))
+		if (registeredUsers.isRegistered(nickUtente))
 			throw new UserAlreadyRegisteredException();
 		
 		// FINE ECCEZIONI //
@@ -50,8 +53,8 @@ public class RegisterImpl extends RemoteServer implements RegisterInterface {
 		// Aggiungo una nuova coppia <nickUtente, new User> alla HashTable dei registrati.
 		// Successivamente, chiamando writeJson() (vedere "Structures") scrivo/aggiorno il file 
 		// json relativo allo stato attuale degli utenti registrati.
-		WordQuizzleUsers.addUser(nickUtente, new User(nickUtente, password));
-		WordQuizzleUsers.writeJson();
+		registeredUsers.registerUser(nickUtente, new User(nickUtente, password));
+		registeredUsers.writeJson();
 		
 		System.out.println("Utente " + nickUtente + " registrato con successo!");
 	
