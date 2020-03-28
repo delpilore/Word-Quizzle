@@ -35,7 +35,6 @@ public class WQClient {
 	public static void main(String[] args) {
 		
         String usr, pass;
-        int cont = 0;
 		
 		Remote remoteObject;
 		RegisterInterface serverObject;
@@ -358,17 +357,8 @@ public class WQClient {
 			        				
 			        				default:
 			        					if(Listener.isInChallenge()) {
-			        						cont++;
-			        						if(cont == 5) {
-			        							request = new Request(usr, null, Operations.MATCH, command);
-			        							Comunication.write(socket, request);
-			        							String matchresult = (String) Comunication.read(socket);
-			        							System.out.println("\n" + matchresult);
-			        						}
-			        						else {
-			        							request = new Request(usr, null, Operations.MATCH, command);
-			        							Comunication.write(socket, request);
-			        						}		
+		        							request = new Request(usr, null, Operations.MATCH, command);
+		        							Comunication.write(socket, request);	
 			        					}
 			        				break;
 		        				}
