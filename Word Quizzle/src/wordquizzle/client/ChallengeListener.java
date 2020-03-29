@@ -42,9 +42,9 @@ public class ChallengeListener implements Runnable {
 	            }
 	            else {
 	            	if(!GeneralUtilities.data(receive).toString().equals("FINE"))
-	            		System.out.println("\n Ecco la parola: " + GeneralUtilities.data(receive).toString());
+	            		System.out.println("\nEcco la parola: " + GeneralUtilities.data(receive).toString());
 	            	else {
-	            		System.out.println("PARITA FINITA!");
+	            		System.out.println("\nPARITA FINITA!");
 	            		setInChallenge(false);
 	            		
 	    	        	byte[] result = new byte[10000]; 
@@ -52,6 +52,7 @@ public class ChallengeListener implements Runnable {
 	    	            UDPSocket.receive(UDPPackResult);
 	    	            
 	    	            System.out.println(GeneralUtilities.data(result).toString());
+	    	            System.out.println("Puoi tornare alle tue classiche operazioni!");
 	            	}
 	            }
 	        }
