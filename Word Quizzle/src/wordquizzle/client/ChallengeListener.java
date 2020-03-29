@@ -28,8 +28,10 @@ public class ChallengeListener implements Runnable {
 	            UDPPackReceive = new DatagramPacket(receive, receive.length); 
 	            UDPSocket.receive(UDPPackReceive);
 	            
+	            String str = GeneralUtilities.UDPToString(UDPPackReceive);
+	            
 	            if(inChallenge==false) {
-		            System.out.println("\n" + GeneralUtilities.data(receive).toString() + " ti ha sfidato! Accetti?");
+		            System.out.println("\n" + str + " ti ha sfidato! Accetti?");
 		            System.out.println("\ty: accetta");
 		            System.out.println("\tn: rifiuta");
 	
@@ -40,9 +42,9 @@ public class ChallengeListener implements Runnable {
 	
 		            timer.schedule( task, 5000 );
 	            }
-	            else {
-	            	if(!GeneralUtilities.data(receive).toString().equals("FINE"))
-	            		System.out.println("\nEcco la parola: " + GeneralUtilities.data(receive).toString());
+	            else {     
+	            	if(!str.equals("FINE"))
+	            		System.out.println("\nEcco la parola: " + str);
 	            	else {
 	            		System.out.println("\nPARITA FINITA!");
 	            		setInChallenge(false);
@@ -51,7 +53,9 @@ public class ChallengeListener implements Runnable {
 	    	            DatagramPacket UDPPackResult = new DatagramPacket(result, result.length); 
 	    	            UDPSocket.receive(UDPPackResult);
 	    	            
-	    	            System.out.println(GeneralUtilities.data(result).toString());
+	    	            String str2 = GeneralUtilities.UDPToString(UDPPackResult);
+	    	            
+	    	            System.out.println(str2);
 	    	            System.out.println("Puoi tornare alle tue classiche operazioni!");
 	            	}
 	            }
