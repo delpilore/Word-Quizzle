@@ -169,6 +169,10 @@ public class RequestHandler implements Runnable {
 							response = new Response (StatusCodes.WRONGREQUEST);
 							Comunication.write(client,response);
 						}
+						else if (usr.equals(message)){
+							response = new Response (StatusCodes.SELFREQUEST);
+							Comunication.write(client,response);
+						}
 						else if (!registeredUsers.getUser(message).isFriend(usr)){
 							response = new Response (StatusCodes.NOTFRIENDS);
 							Comunication.write(client,response);
@@ -179,10 +183,6 @@ public class RequestHandler implements Runnable {
 						}
 						else if (!challengeableUsers.isChallengeable(message)) {
 							response = new Response (StatusCodes.USERINMATCH);
-							Comunication.write(client,response);
-						}
-						else if (usr.equals(message)){
-							response = new Response (StatusCodes.SELFREQUEST);
 							Comunication.write(client,response);
 						}
 						else {
@@ -205,8 +205,8 @@ public class RequestHandler implements Runnable {
 								response = new Response (StatusCodes.MATCHSTARTING);
 								Comunication.write(client,response);
 								
-								Match match = new Match(registeredUsers.getUser(usr), challengeableUsers.getChallengerPort(usr), registeredUsers.getUser(message), challengeableUsers.getChallengerPort(message));
-								match.fetchTraductions(selectedWords);
+								Match match = new Match(usr, challengeableUsers.getChallengerPort(usr), message, challengeableUsers.getChallengerPort(message), selectedWords);
+								match.fetchTraductions();
 								
 								currentMatches.addMatch(usr, match);
 								currentMatches.addMatch(message, match);
@@ -215,7 +215,7 @@ public class RequestHandler implements Runnable {
 								challengeableUsers.removeChallenger(message);
 								
 								Timer timer = new Timer();
-								TimerTask task = new MatchTimeOver(currentMatches, match, challengeableUsers);
+								TimerTask task = new MatchTimeOver(currentMatches, match, challengeableUsers, registeredUsers);
 								
 								match.beginMatch();
 								timer.schedule( task, 30000 );
