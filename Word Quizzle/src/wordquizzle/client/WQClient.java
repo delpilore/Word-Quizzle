@@ -17,6 +17,7 @@ import wordquizzle.Request;
 import wordquizzle.Response;
 import wordquizzle.StatusCodes;
 import wordquizzle.RegisterInterface.UserAlreadyRegisteredException;
+import wordquizzle.RegisterInterface.UsernameTooLongException;
 import wordquizzle.RegisterInterface.UsernameTooShortException;
 import wordquizzle.RegisterInterface.WeakPasswordException;
 import wordquizzle.Comunication;
@@ -99,6 +100,9 @@ public class WQClient {
 		    		}
 		    		catch(UsernameTooShortException e) {
 		    			System.out.print("\tNome utente troppo corto! Deve essere almeno di 3 caratteri!\n");
+		    		}
+		    		catch(UsernameTooLongException e) {
+		    			System.out.print("\tNome utente troppo lungo! Deve essere massimo di 12 caratteri!\n");
 		    		}
 		    		catch(Exception e) {
 		    			System.out.print("\tQualcosa è andato storto..\n");
@@ -347,7 +351,7 @@ public class WQClient {
 												
 					        	            	InetAddress ip = InetAddress.getLocalHost(); 
 					        		        
-					        		    		byte[] send = command.getBytes();
+					        		    		byte[] send = command.getBytes("UTF8");
 					        					DatagramPacket DpSend = new DatagramPacket(send, send.length, ip, Listener.getServerUDPPort()); 
 					        					
 												Listener.getDatagramSocket().send(DpSend);
