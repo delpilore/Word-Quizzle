@@ -18,7 +18,7 @@ public enum StatusCodes {
 	USERNOTONLINE("L'utente che vuoi sfidare non risulta online!\n"),
 	USERINMATCH("L'utente che vuoi sfidare risulta già in una sfida!\n"),
 	NOTFRIENDS("Non sei amico con questo utente!\n"),
-	MATCHSTARTING("Ok, la sfida è stata accettata!\n"),
+	MATCHSTARTING("Ok, la sfida sta per iniziare, traduci più parole possibili!\n"),
 	MATCHDECLINED("La sfida è stata declinata!\n"),
 	SELFREQUEST("Non puoi mandare una richiesta a te stesso!\n"),
 	TIMEOUT("L'avversario non ha fatto in tempo ad accettare!\n"),
