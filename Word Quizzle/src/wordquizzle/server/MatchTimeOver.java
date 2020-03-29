@@ -7,17 +7,20 @@ import java.util.TimerTask;
 
 import wordquizzle.server.structures.ChallengeableUsers;
 import wordquizzle.server.structures.CurrentMatches;
+import wordquizzle.server.structures.RegisteredUsers;
 
 public class MatchTimeOver extends TimerTask {
 	
 	private ChallengeableUsers challengeableUsers;
 	private CurrentMatches currentMatches;
 	private Match match;
+	private RegisteredUsers registeredUsers;
 
-	public MatchTimeOver(CurrentMatches _currentMatches,  Match _match, ChallengeableUsers _challengeableUsers ) {
+	public MatchTimeOver(CurrentMatches _currentMatches,  Match _match, ChallengeableUsers _challengeableUsers, RegisteredUsers _registeredUsers ) {
 		challengeableUsers = _challengeableUsers;
 		currentMatches = _currentMatches;
 		match = _match;
+		registeredUsers = _registeredUsers;
 	}
 	
 	public void run() {
@@ -42,10 +45,12 @@ public class MatchTimeOver extends TimerTask {
 		if(firstOpponentResult > secondOpponentResult) {
 			firstResult = firstResult + "\nHai vinto complimenti! Guadagni 3 punti extra\n";
 			secondResult = secondResult + "\nHai perso! Peccato..\n";
+			firstOpponentResult = firstOpponentResult + 3;
 		}
 		else if (firstOpponentResult < secondOpponentResult) {
 			firstResult = firstResult + "\nHai perso! Peccato..\n";
 			secondResult = secondResult + "\nHai vinto complimenti! Guadagni 3 punti extra\n";
+			secondOpponentResult = secondOpponentResult + 3;
 		}
 		else {
 			firstResult = firstResult + "\nE' un pareggio!\n";
@@ -77,6 +82,9 @@ public class MatchTimeOver extends TimerTask {
 		currentMatches.removeMatch(match.getFirstOpponent());
 		currentMatches.removeMatch(match.getSecondOpponent());
 		
-		//devo anche updatare il punteggioooo
+		registeredUsers.getUser(match.getFirstOpponent()).updateScore(firstOpponentResult);
+		registeredUsers.getUser(match.getSecondOpponent()).updateScore(secondOpponentResult);
+		
+		registeredUsers.writeJson();
 	}
 }

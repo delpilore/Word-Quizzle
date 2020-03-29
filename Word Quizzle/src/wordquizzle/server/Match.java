@@ -16,50 +16,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Match {
-
-	private User firstOpponent;
-	private int firstOpponentUDPPort;
-	private int firstOpponentWord;
-	private int firstOpponentCorrect;
-	private int firstOpponentIncorrect;
-	private int firstOpponentNotGiven;
-	private Boolean firstOpponentEnd;
-
-	private User secondOpponent;
-	private int secondOpponentUDPPort;
-	private int secondOpponentWord;
-	private int secondOpponentCorrect;
-	private int secondOpponentIncorrect;
-	private int secondOpponentNotGiven;
-	private Boolean secondOpponentEnd;
+	
+	private Opponent firstOpponent;
+	private Opponent secondOpponent;
 	
 	private Hashtable<String,String> wordsTraduction;
-	private ArrayList<String> words;
+	private ArrayList<String> italianWords;
     
-	public Match(User _firstOpponent, int _firstOpponentUDPPort, User _secondOpponent, int _secondOpponentUDPPort ) {
+	public Match(String _firstOpponent, int _firstOpponentUDPPort, String _secondOpponent, int _secondOpponentUDPPort, ArrayList<String> _selectedWords ) {
 		
-		firstOpponent = _firstOpponent;
-		firstOpponentUDPPort = _firstOpponentUDPPort;
-		firstOpponentWord=0;
-		firstOpponentCorrect=0;
-		firstOpponentIncorrect=0;
-		firstOpponentNotGiven=5;
-		firstOpponentEnd=false;
-
-		secondOpponent = _secondOpponent;
-		secondOpponentUDPPort = _secondOpponentUDPPort;
-		secondOpponentWord=0;
-		secondOpponentCorrect=0;
-		secondOpponentIncorrect=0;
-		secondOpponentNotGiven=5;
-		secondOpponentEnd=false;
-		
+		firstOpponent = new Opponent(_firstOpponent, _firstOpponentUDPPort);	
+		secondOpponent = new Opponent(_secondOpponent, _secondOpponentUDPPort);
 		wordsTraduction = new Hashtable<String,String>();
+		italianWords = _selectedWords;
+		
 	}
 	
-	public void fetchTraductions(ArrayList<String> _words) {
-		
-		words = _words;
+	public void fetchTraductions() {
 		
 		try {			
 			
@@ -68,7 +41,7 @@ public class Match {
 
 			for(int i = 0; i<5; i++) {
 				
-				String q = words.get(i);
+				String q = italianWords.get(i);
 				String langpair = "it|en";
 				
 				String query = String.format("q=%s&langpair=%s", URLEncoder.encode(q, charset), URLEncoder.encode(langpair, charset));
@@ -83,7 +56,8 @@ public class Match {
 					ObjectNode object = new ObjectMapper().readValue(inputLine, ObjectNode.class);
 				    JsonNode node = object.get("responseData");
 				    node = node.get("translatedText");
-				    wordsTraduction.put(words.get(i), node.asText());
+				    wordsTraduction.put(italianWords.get(i), node.asText());
+				    System.out.println(wordsTraduction);
 				}
 				in.close();
 				con.disconnect();
@@ -97,13 +71,13 @@ public class Match {
 	
 	public void beginMatch() {
 		try {
-			byte buf[] = words.get(0).getBytes();
+			byte buf[] = italianWords.get(0).getBytes();
 			
 			InetAddress ip = InetAddress.getLocalHost(); 
 			DatagramSocket ds = new DatagramSocket();
 			
-			DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, firstOpponentUDPPort); 
-			DatagramPacket DpSend2 = new DatagramPacket(buf, buf.length, ip, secondOpponentUDPPort); 
+			DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, firstOpponent.getUDPPort()); 
+			DatagramPacket DpSend2 = new DatagramPacket(buf, buf.length, ip, secondOpponent.getUDPPort()); 
 			
 			ds.send(DpSend); 
 			ds.send(DpSend2);
@@ -117,82 +91,47 @@ public class Match {
 	
 	public void sendNextWord(String usr, String _word) {
 		
-		if(usr.equals(firstOpponent.getUsername())) {
-
-			if (_word.equals(wordsTraduction.get(words.get(firstOpponentWord)))) {
-				firstOpponentCorrect = getFirstOpponentCorrect() + 1;
-				firstOpponentNotGiven = getFirstOpponentNotGiven() - 1;
-			}
-			else {
-				firstOpponentIncorrect = getFirstOpponentIncorrect() + 1;
-				firstOpponentNotGiven = getFirstOpponentNotGiven() - 1;
-			}
-						
-			firstOpponentWord++;
-			
-			if(firstOpponentWord==5) {
-				endMatch(firstOpponentUDPPort);
-				firstOpponentEnd = true;
-				return;
-			}
-				
-			byte buf[] = words.get(firstOpponentWord).getBytes();
-			
-			try {
-				InetAddress ip = InetAddress.getLocalHost(); 
-				DatagramSocket ds = new DatagramSocket();
-				
-				DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, firstOpponentUDPPort); 
-	 
-				ds.send(DpSend); 
-				
-				ds.close();
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		else {
-
-			if (_word.equals(wordsTraduction.get(words.get(secondOpponentWord)))) {
-				secondOpponentCorrect = getSecondOpponentCorrect() + 1;
-				secondOpponentNotGiven = getSecondOpponentNotGiven() - 1;
-			}
-			else {
-				secondOpponentIncorrect = getSecondOpponentIncorrect() + 1;
-				secondOpponentNotGiven = getSecondOpponentNotGiven() - 1;
-			}
-			
-			secondOpponentWord++;
-			
-			if(secondOpponentWord==5) {
-				endMatch(secondOpponentUDPPort);
-				secondOpponentEnd=true;
-				return;
-			}
-			
-			byte buf[] = words.get(secondOpponentWord).getBytes();
-			
-			try {
-				InetAddress ip = InetAddress.getLocalHost(); 
-				DatagramSocket ds = new DatagramSocket();
-				
-				DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, secondOpponentUDPPort); 
-	 
-				ds.send(DpSend); 
-				
-				ds.close();
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
-		}		
+		if(usr.equals(firstOpponent.getNick())) 
+			checkAndSend(firstOpponent, _word);
+		else
+			checkAndSend(secondOpponent, _word);	
+		
 	}
 	
-	
-	
-	
+	public void checkAndSend(Opponent _opponent, String _word) {
+		
+		if (_word.equals(wordsTraduction.get(italianWords.get(_opponent.getCurrentWord())))) {
+			_opponent.updateCorrectWords();
+		}
+		else {
+			_opponent.updateIncorrectWords();
+		}
+		
+		_opponent.updateNotGivenWords();			
+		_opponent.updateCurrentWord();
+		
+		if(_opponent.getCurrentWord()==5) {
+			endMatch(_opponent.getUDPPort());
+			_opponent.end();
+			return;
+		}
+			
+		byte buf[] = italianWords.get(_opponent.getCurrentWord()).getBytes();
+		
+		try {
+			InetAddress ip = InetAddress.getLocalHost(); 
+			DatagramSocket ds = new DatagramSocket();
+			
+			DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, _opponent.getUDPPort()); 
+ 
+			ds.send(DpSend); 
+			
+			ds.close();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public void endMatch(int port) {
 		try {
@@ -213,56 +152,51 @@ public class Match {
 		}
 	}
 	
-
-	
-	
-	
 	public String getFirstOpponent() {
-		return firstOpponent.getUsername();
+		return firstOpponent.getNick();
 	}
 
 	public int getFirstOpponentUDPPort() {
-		return firstOpponentUDPPort;
+		return firstOpponent.getUDPPort();
 	}
 
 	public String getSecondOpponent() {
-		return secondOpponent.getUsername();
+		return secondOpponent.getNick();
 	}
 
 	public int getSecondOpponentUDPPort() {
-		return secondOpponentUDPPort;
+		return secondOpponent.getUDPPort();
 	}
 
 	public int getFirstOpponentCorrect() {
-		return firstOpponentCorrect;
+		return firstOpponent.getCorrectWords();
 	}
 
 	public int getFirstOpponentIncorrect() {
-		return firstOpponentIncorrect;
+		return firstOpponent.getIncorrectWords();
 	}
 
 	public int getFirstOpponentNotGiven() {
-		return firstOpponentNotGiven;
+		return firstOpponent.getNotGivenWords();
 	}
 
 	public int getSecondOpponentCorrect() {
-		return secondOpponentCorrect;
+		return secondOpponent.getCorrectWords();
 	}
 
 	public int getSecondOpponentIncorrect() {
-		return secondOpponentIncorrect;
+		return secondOpponent.getIncorrectWords();
 	}
 
 	public int getSecondOpponentNotGiven() {
-		return secondOpponentNotGiven;
+		return secondOpponent.getNotGivenWords();
 	}
 
 	public Boolean getFirstOpponentEnd() {
-		return firstOpponentEnd;
+		return firstOpponent.hasEnded();
 	}
 
 	public Boolean getSecondOpponentEnd() {
-		return secondOpponentEnd;
+		return secondOpponent.hasEnded();
 	}
-	
 }
