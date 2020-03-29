@@ -32,7 +32,9 @@ public class RegisterImpl extends RemoteServer implements RegisterInterface {
 	// alla Hashtable principale del server, quella che mappa gli utenti registrati al servizio
 	// e i loro dati. (vedere "Structures") 
 	// Realizza quindi una registrazione dell'utente.
-	public boolean registra_utente (String nickUtente, String password) throws RemoteException, UserAlreadyRegisteredException, NullPointerException, WeakPasswordException, UsernameTooShortException {
+	public boolean registra_utente (String nickUtente, String password) throws RemoteException, UserAlreadyRegisteredException, 
+																			   NullPointerException, WeakPasswordException, 
+																			   UsernameTooShortException, UsernameTooLongException {
 		
 		// ECCEZIONI //
 		
@@ -44,6 +46,9 @@ public class RegisterImpl extends RemoteServer implements RegisterInterface {
 		
 		if (nickUtente.length()<3)
 			throw new UsernameTooShortException();
+		
+		if (nickUtente.length()>12)
+			throw new UsernameTooLongException();
 		
 		if (registeredUsers.isRegistered(nickUtente))
 			throw new UserAlreadyRegisteredException();

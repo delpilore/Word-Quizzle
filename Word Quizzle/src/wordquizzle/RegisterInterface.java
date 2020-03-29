@@ -21,7 +21,7 @@ public interface RegisterInterface extends Remote {
 	// Realizza quindi una registrazione dell'utente.
 	boolean registra_utente (String nickUtente, String password) throws RemoteException, UserAlreadyRegisteredException, 
 																		NullPointerException, UsernameTooShortException, 
-																		WeakPasswordException ;
+																		WeakPasswordException, UsernameTooLongException;
 	
 	// UserAlreadyRegisteredException 
 	//
@@ -53,6 +53,18 @@ public interface RegisterInterface extends Remote {
         }
         
         public UsernameTooShortException(String s) {
+            super(s);
+        }
+    }
+	
+	@SuppressWarnings("serial")
+	class UsernameTooLongException extends Exception {
+
+		public UsernameTooLongException() {
+            super();
+        }
+        
+        public UsernameTooLongException(String s) {
             super(s);
         }
     }
