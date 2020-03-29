@@ -144,15 +144,17 @@ public class WQClient {
   				
 		        			logged=true;
 		        			while(logged) {
-
-			        			System.out.print("\nPannello di controllo di " + usr + ", sei attualmente loggato a Word Quizzle!\n");
-		        				System.out.print( "\n\tLo: Effettua il logout\n"
-		       		                 + "\tA: Aggiungi un amico\n"
-		    		                 + "\tLa: Vedi la tua lista amici\n"
-		    		                 + "\tS: Sfida un amico\n"
-		    		                 + "\tP: Vedi il tuo punteggio\n"
-		    		                 + "\tC: Vedi la classifica con i tuoi amici\n"
-		    		         		 + "\tX: Chiudi (ed effettua il logout) \n\t" );
+		        				
+		        				if(!Listener.isInChallenge()) {
+				        			System.out.print("\nPannello di controllo di " + usr + ", sei attualmente loggato a Word Quizzle!\n");
+			        				System.out.print( "\n\tLo: Effettua il logout\n"
+			       		                 + "\tA: Aggiungi un amico\n"
+			    		                 + "\tLa: Vedi la tua lista amici\n"
+			    		                 + "\tS: Sfida un amico\n"
+			    		                 + "\tP: Vedi il tuo punteggio\n"
+			    		                 + "\tC: Vedi la classifica con i tuoi amici\n"
+			    		         		 + "\tX: Chiudi (ed effettua il logout) \n\t" );
+		        				}
 		        				command = input.next();
 		        				
 		        				switch (command) {
@@ -342,6 +344,7 @@ public class WQClient {
 												// CORRETTO QUI
 												if (command.equals("y"))
 													Listener.setInChallenge(true);
+												
 					        	            	InetAddress ip = InetAddress.getLocalHost(); 
 					        		        
 					        		    		byte[] send = command.getBytes();
