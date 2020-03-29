@@ -26,6 +26,7 @@ public class MatchTimeOver extends TimerTask {
 	public void run() {
 		if(!match.getFirstOpponentEnd())
 			match.endMatch(match.getFirstOpponentUDPPort());
+		
 		if(!match.getSecondOpponentEnd())
 			match.endMatch(match.getSecondOpponentUDPPort());
 		
