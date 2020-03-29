@@ -8,8 +8,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -189,7 +187,7 @@ public class RequestHandler implements Runnable {
 							
 							ArrayList<String> selectedWords = ServerUtilities.getWords();
 							
-							byte buf[] = usr.getBytes();
+							byte buf[] = usr.getBytes("UTF8");
 							byte[] receive = new byte[100]; 
 							
 							InetAddress ip = InetAddress.getLocalHost(); 
@@ -201,7 +199,7 @@ public class RequestHandler implements Runnable {
 							ds.send(DpSend); 
 				            ds.receive(DpReceive);
 
-				            if(GeneralUtilities.data(receive).toString().equals("y")) {
+				            if(GeneralUtilities.UDPToString(DpReceive).equals("y")) {
 								response = new Response (StatusCodes.MATCHSTARTING);
 								Comunication.write(client,response);
 								
@@ -214,13 +212,14 @@ public class RequestHandler implements Runnable {
 								challengeableUsers.removeChallenger(usr);
 								challengeableUsers.removeChallenger(message);
 								
-								Timer timer = new Timer();
-								TimerTask task = new MatchTimeOver(currentMatches, match, challengeableUsers, registeredUsers);
+								ReschedulableTimer timer = new ReschedulableTimer();
+								MatchTimeOver task = new MatchTimeOver(currentMatches, match, challengeableUsers, registeredUsers);
 								
 								match.beginMatch();
-								timer.schedule( task, 30000 );
+								timer.schedule( task, 60000 );
+								match.setTimer(timer);
 				            }
-				            else if (GeneralUtilities.data(receive).toString().equals("n")){
+				            else if (GeneralUtilities.UDPToString(DpReceive).equals("n")){
 								response = new Response (StatusCodes.MATCHDECLINED);
 								Comunication.write(client,response);
 				            }

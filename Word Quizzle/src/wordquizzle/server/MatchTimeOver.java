@@ -3,13 +3,12 @@ package wordquizzle.server;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.TimerTask;
 
 import wordquizzle.server.structures.ChallengeableUsers;
 import wordquizzle.server.structures.CurrentMatches;
 import wordquizzle.server.structures.RegisteredUsers;
 
-public class MatchTimeOver extends TimerTask {
+public class MatchTimeOver implements Runnable {
 	
 	private ChallengeableUsers challengeableUsers;
 	private CurrentMatches currentMatches;

@@ -19,6 +19,7 @@ public class Match {
 	
 	private Opponent firstOpponent;
 	private Opponent secondOpponent;
+	private ReschedulableTimer timer;
 	
 	private Hashtable<String,String> wordsTraduction;
 	private ArrayList<String> italianWords;
@@ -71,7 +72,7 @@ public class Match {
 	
 	public void beginMatch() {
 		try {
-			byte buf[] = italianWords.get(0).getBytes();
+			byte buf[] = italianWords.get(0).getBytes("UTF8");
 			
 			InetAddress ip = InetAddress.getLocalHost(); 
 			DatagramSocket ds = new DatagramSocket();
@@ -92,13 +93,13 @@ public class Match {
 	public void sendNextWord(String usr, String _word) {
 		
 		if(usr.equals(firstOpponent.getNick())) 
-			checkAndSend(firstOpponent, _word);
+			checkAndSend(firstOpponent, secondOpponent, _word);
 		else
-			checkAndSend(secondOpponent, _word);	
+			checkAndSend(secondOpponent, firstOpponent, _word);	
 		
 	}
 	
-	public void checkAndSend(Opponent _opponent, String _word) {
+	public void checkAndSend(Opponent _opponent, Opponent _second, String _word) {
 		
 		if (_word.equals(wordsTraduction.get(italianWords.get(_opponent.getCurrentWord())))) {
 			_opponent.updateCorrectWords();
@@ -113,12 +114,14 @@ public class Match {
 		if(_opponent.getCurrentWord()==5) {
 			endMatch(_opponent.getUDPPort());
 			_opponent.end();
+			if(_second.hasEnded()) {
+				timer.reschedule(100);
+			}		
 			return;
 		}
-			
-		byte buf[] = italianWords.get(_opponent.getCurrentWord()).getBytes();
-		
+
 		try {
+			byte buf[] = italianWords.get(_opponent.getCurrentWord()).getBytes("UTF8");
 			InetAddress ip = InetAddress.getLocalHost(); 
 			DatagramSocket ds = new DatagramSocket();
 			
@@ -136,7 +139,7 @@ public class Match {
 	public void endMatch(int port) {
 		try {
 			String fine = "FINE";
-			byte buf[] = fine.getBytes();
+			byte buf[] = fine.getBytes("UTF8");
 			
 			InetAddress ip = InetAddress.getLocalHost(); 
 			DatagramSocket ds = new DatagramSocket();
@@ -198,5 +201,9 @@ public class Match {
 
 	public Boolean getSecondOpponentEnd() {
 		return secondOpponent.hasEnded();
+	}
+	
+	public void setTimer(ReschedulableTimer _timer) {
+		timer = _timer;
 	}
 }
