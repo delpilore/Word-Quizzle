@@ -6,8 +6,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/lored/git/Word-Quizzle/Word Quizzle/packages/jackson-annotations-2.10.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/lored/git/Word-Quizzle/Word Quizzle/packages/jackson-core-2.10.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/lored/git/Word-Quizzle/Word Quizzle/packages/jackson-databind-2.10.3.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Jackson"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
