@@ -5,7 +5,7 @@ package wordquizzle;
 /*
 * OPERATIONS
 * 
-* Questa enumerazione definisce tutte le operazioni che possono essere richieste da un utente registrato, al server.
+* Questa enumerazione definisce tutte le operazioni che possono essere richieste da un utente registrato, al Server.
 */
 
 public enum Operations {

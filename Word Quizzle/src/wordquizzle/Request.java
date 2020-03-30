@@ -9,7 +9,7 @@ import java.io.Serializable;
 * 
 * Oggetto serializzabile che viene utilizzato dal client per inviare una richiesta al server.
 * Contiene l'username, l'eventuale password, l'operazione richiesta (vedere "Operations") e 
-* l'eventuale messaggio (usr da aggiungere come amico, usr da sfidare)
+* l'eventuale messaggio ("nome_utente" da aggiungere come amico, "nome_utente" da sfidare)
 */
 
 public class Request implements Serializable {
@@ -27,6 +27,8 @@ public class Request implements Serializable {
 		operation = _operation;	
 		message = _message;
 	}
+	
+	// Metodi getters utili al server per estrarre le informazioni dal messaggio Request
 	
 	public String getRequestUsername() {
 		return username;

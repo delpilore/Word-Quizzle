@@ -16,8 +16,7 @@ public interface RegisterInterface extends Remote {
 	// registra_utente(String nickUtente, String password)
 	//
 	// Metodo chiamato in RMI da parte del client, che aggiunge un nuovo oggetto User (vedere "User") 
-	// alla Hashtable principale del server, quella che mappa gli utenti registrati al servizio
-	// e i loro dati. (vedere "Structures") 
+	// alla tabella degli utenti registrati a Word Quizzle (vedere "RegisteredUsers" nel package wordquizzle.server.structures)
 	// Realizza quindi una registrazione dell'utente.
 	boolean registra_utente (String nickUtente, String password) throws RemoteException, UserAlreadyRegisteredException, 
 																		NullPointerException, UsernameTooShortException, 
@@ -57,6 +56,11 @@ public interface RegisterInterface extends Remote {
         }
     }
 	
+	// UsernameTooLongException
+	//
+	// Eccezione checked non presente in Java.
+	// Viene sollevata quando un client prova registrarsi al servizio utilizzando un username 
+	// più lungo di 12 caratteri.
 	@SuppressWarnings("serial")
 	class UsernameTooLongException extends Exception {
 

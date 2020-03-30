@@ -6,7 +6,7 @@ package wordquizzle;
 * STATUSCODES
 * 
 * Questa enumerazione definisce tutte le possibili risposte che il server può dare ad una richiesta da parte di un client.
-* Al singolo caso è associata una stringa che vuole rappresentare una sorta di "reason phrase alla HTTP" utile per l'utente umano.
+* Ad ogni caso è associata una stringa che vuole rappresentare una sorta di "reason phrase alla HTTP" utile per l'utente umano.
 */
 
 public enum StatusCodes {

@@ -9,8 +9,8 @@ import java.io.Serializable;
 * 
 * Oggetto serializzabile che viene utilizzato dal server come risposta ad una "Request" da parte di un client.
 * Si limita a contenere uno StatusCodes (vedere file relativo "StatusCodes")
-* In caso il server debba spedire altro, un oggetto Json per esempio, viene direttamente spedito con una write
-* tutta sua. (e la response non viene inviata) (DA CAMBIARE)
+* In caso il server debba spedire altro, un oggetto Json per esempio, viene direttamente spedito con una write (vedere "Communication")
+* tutta sua. 
 */
 
 public class Response implements Serializable {
