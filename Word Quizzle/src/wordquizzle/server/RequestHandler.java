@@ -184,6 +184,11 @@ public class RequestHandler implements Runnable {
 							Comunication.write(client,response);
 						}
 						else {
+							int usrPort = challengeableUsers.getChallengerPort(usr);
+							int messagePort = challengeableUsers.getChallengerPort(message);
+							
+							challengeableUsers.removeChallenger(usr);
+							challengeableUsers.removeChallenger(message);
 							
 							ArrayList<String> selectedWords = ServerUtilities.getWords();
 							
@@ -193,9 +198,9 @@ public class RequestHandler implements Runnable {
 							InetAddress ip = InetAddress.getLocalHost(); 
 							DatagramSocket ds = new DatagramSocket();
 							
-							DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, challengeableUsers.getChallengerPort(message)); 
+							DatagramPacket DpSend = new DatagramPacket(buf, buf.length, ip, messagePort); 
 							DatagramPacket DpReceive = new DatagramPacket(receive, receive.length); 
-							
+
 							ds.send(DpSend); 
 				            ds.receive(DpReceive);
 
@@ -203,14 +208,11 @@ public class RequestHandler implements Runnable {
 								response = new Response (StatusCodes.MATCHSTARTING);
 								Comunication.write(client,response);
 								
-								Match match = new Match(usr, challengeableUsers.getChallengerPort(usr), message, challengeableUsers.getChallengerPort(message), selectedWords);
+								Match match = new Match(usr, usrPort, message, messagePort, selectedWords);
 								match.fetchTraductions();
 								
 								currentMatches.addMatch(usr, match);
 								currentMatches.addMatch(message, match);
-								
-								challengeableUsers.removeChallenger(usr);
-								challengeableUsers.removeChallenger(message);
 								
 								ReschedulableTimer timer = new ReschedulableTimer();
 								MatchTimeOver task = new MatchTimeOver(currentMatches, match, challengeableUsers, registeredUsers);
@@ -222,10 +224,14 @@ public class RequestHandler implements Runnable {
 				            else if (GeneralUtilities.UDPToString(DpReceive).equals("n")){
 								response = new Response (StatusCodes.MATCHDECLINED);
 								Comunication.write(client,response);
+								challengeableUsers.addChallenger(usr, usrPort);
+								challengeableUsers.addChallenger(message, messagePort);
 				            }
 				            else {
 				            	response = new Response (StatusCodes.TIMEOUT);
 								Comunication.write(client,response);
+								challengeableUsers.addChallenger(usr, usrPort);
+								challengeableUsers.addChallenger(message, messagePort);
 				            }
 				            
 				            ds.close();
