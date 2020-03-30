@@ -173,6 +173,7 @@ public class WQClient {
 				        		        	System.out.print("\tChiudo ed effettuo il logout\n");
 				        		        	logged = false;
 				        		        	on = false;
+				        		        	Acceptor.interrupt();
 			        		        	}
 			        		        	else 
 			        		        		System.out.print("\tEffettuo il logout\n");
@@ -344,6 +345,7 @@ public class WQClient {
 				        		        	try {
 				        		        		
 												Listener.setChallenged(false);
+												Listener.stopTimer();
 												
 												// CORRETTO QUI
 												if (command.equals("y"))
@@ -389,6 +391,7 @@ public class WQClient {
 		        case "X":
 		        case "x":
 		        	System.out.print("Chiudo\n");
+		        	Acceptor.interrupt();
 		        	on = false;
 		        break;	
 	        }

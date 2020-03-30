@@ -2,6 +2,7 @@ package wordquizzle.client;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketTimeoutException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,6 +16,7 @@ public class ChallengeListener implements Runnable {
 	private int serverUDPPort;
 	private Boolean challenged = false;
 	private Boolean inChallenge = false;
+	private Timer timer;
 
 	public ChallengeListener(int _port) {
 		myUDPPort = _port;
@@ -23,10 +25,18 @@ public class ChallengeListener implements Runnable {
 	public void run() {
 		try {
 			UDPSocket = new DatagramSocket(myUDPPort);
-	        while (true) { 
+
+	        while (!Thread.currentThread().isInterrupted()) { 
+	        	UDPSocket.setSoTimeout(100);
 	        	byte[] receive = new byte[1000]; 
 	            UDPPackReceive = new DatagramPacket(receive, receive.length); 
-	            UDPSocket.receive(UDPPackReceive);
+	            
+	            try {
+	            	UDPSocket.receive(UDPPackReceive);
+	            }
+	            catch(SocketTimeoutException e) {
+	            	continue;
+	            }
 	            
 	            String str = GeneralUtilities.UDPToString(UDPPackReceive);
 	            
@@ -37,7 +47,7 @@ public class ChallengeListener implements Runnable {
 	
 		            serverUDPPort = UDPPackReceive.getPort();
 		            setChallenged(true);
-		            Timer timer = new Timer();
+		            timer = new Timer();
 		            TimerTask task = new OutOfTime(this);
 	
 		            timer.schedule( task, 5000 );
@@ -49,10 +59,12 @@ public class ChallengeListener implements Runnable {
 	            		System.out.println("\nPARITA FINITA!");
 	            		setInChallenge(false);
 	            		
+	            		UDPSocket.setSoTimeout(0);
 	    	        	byte[] result = new byte[10000]; 
 	    	            DatagramPacket UDPPackResult = new DatagramPacket(result, result.length); 
+
 	    	            UDPSocket.receive(UDPPackResult);
-	    	            
+
 	    	            String str2 = GeneralUtilities.UDPToString(UDPPackResult);
 	    	            
 	    	            System.out.println(str2);
@@ -88,5 +100,9 @@ public class ChallengeListener implements Runnable {
 	
 	public Boolean isInChallenge() {
 		return inChallenge;
+	}
+	
+	public void stopTimer() {
+		timer.cancel();
 	}
 }
