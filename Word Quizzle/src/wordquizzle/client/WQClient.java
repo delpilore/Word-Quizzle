@@ -20,7 +20,7 @@ import wordquizzle.RegisterInterface.UserAlreadyRegisteredException;
 import wordquizzle.RegisterInterface.UsernameTooLongException;
 import wordquizzle.RegisterInterface.UsernameTooShortException;
 import wordquizzle.RegisterInterface.WeakPasswordException;
-import wordquizzle.Comunication;
+import wordquizzle.Communication;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
@@ -128,8 +128,8 @@ public class WQClient {
 		        		System.out.print("\tTentativo di connessione...\n");
 		        		socket = new Socket(hostname, serverTCPPort);
 		        		
-		        		Comunication.write(socket, request);
-		        		response = (Response) Comunication.read(socket);
+		        		Communication.write(socket, request);
+		        		response = (Response) Communication.read(socket);
 		        	}
 		        	catch (Exception e) {
 			        	e.printStackTrace(); 
@@ -142,7 +142,7 @@ public class WQClient {
 	        				System.out.print("\n\tSei loggato!\n");
 	        				
 	        				// Scrivo al server la porta UDP selezionata su cui il Listener per le sfide ascolterà
-	        				Comunication.write(socket, myUDPPort);
+	        				Communication.write(socket, myUDPPort);
 	        				
 	        				System.out.print("\t-----------------\n");
   				
@@ -182,8 +182,8 @@ public class WQClient {
 			        		        	
 			        		        	try {
 	
-			        		        		Comunication.write(socket,request);
-			        		        		response = (Response) Comunication.read(socket);
+			        		        		Communication.write(socket,request);
+			        		        		response = (Response) Communication.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
 			        		        		
@@ -208,8 +208,8 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-			        		        		Comunication.write(socket,request);
-			        		        		response = (Response) Comunication.read(socket);
+			        		        		Communication.write(socket,request);
+			        		        		response = (Response) Communication.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
 			        		        		
@@ -230,9 +230,9 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-			        		        		Comunication.write(socket,request);
+			        		        		Communication.write(socket,request);
 				        		            
-				        		            JsonNode json = (JsonNode) Comunication.read(socket);
+				        		            JsonNode json = (JsonNode) Communication.read(socket);
 				        		            
 				        		            if (json.isEmpty()){
 				        		            	System.out.print("\tLa tua lista amici è vuota!\n");
@@ -262,8 +262,8 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-			        		        		Comunication.write(socket,request);
-			        		        		int score = (int) Comunication.read(socket);
+			        		        		Communication.write(socket,request);
+			        		        		int score = (int) Communication.read(socket);
 			        		        		
 			        		        		System.out.print("\tIl tuo punteggio è: " + score + "\n");
 			        		        		
@@ -286,9 +286,9 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-			        		        		Comunication.write(socket,request);
+			        		        		Communication.write(socket,request);
 				        		            
-				        		            JsonNode json = (JsonNode) Comunication.read(socket);
+				        		            JsonNode json = (JsonNode) Communication.read(socket);
 				        		            
 				        		            if (json.isEmpty()){
 				        		            	System.out.print("\tLa tua lista amici è vuota!\n");
@@ -322,8 +322,8 @@ public class WQClient {
 			        		        
 			        		        	try {
 			        		        		
-			        		        		Comunication.write(socket,request);
-			        		        		response = (Response) Comunication.read(socket);
+			        		        		Communication.write(socket,request);
+			        		        		response = (Response) Communication.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
 			        		        		if (response.getStatusCode()==StatusCodes.MATCHSTARTING)
@@ -370,7 +370,7 @@ public class WQClient {
 			        				default:
 			        					if(Listener.isInChallenge()) {
 		        							request = new Request(usr, null, Operations.MATCH, command);
-		        							Comunication.write(socket, request);	
+		        							Communication.write(socket, request);	
 			        					}
 			        				break;
 		        				}

@@ -20,7 +20,7 @@ import wordquizzle.server.structures.RegisteredUsers;
 import wordquizzle.Request;
 import wordquizzle.Response;
 import wordquizzle.GeneralUtilities;
-import wordquizzle.Comunication;
+import wordquizzle.Communication;
 
 public class RequestHandler implements Runnable {
 	
@@ -60,30 +60,30 @@ public class RequestHandler implements Runnable {
 						
 						if (!registeredUsers.isRegistered(usr)) {
 							response = new Response (StatusCodes.USERNOTREGISTERED);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 			        		client.close();
 						}
 						
 						else if (registeredUsers.getUser(usr).getOnlineState()) {
 							response = new Response (StatusCodes.USERALREADYONLINE);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 			        		client.close();
 						}
 						
 						else if (!pass.equals(registeredUsers.getUser(usr).getPassword())) {
 							response = new Response (StatusCodes.WRONGPASSWORD);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 			        		client.close();
 						}
 						
 						else {
 							response = new Response (StatusCodes.OK);
 																		
-							Comunication.write(client,response);
+							Communication.write(client,response);
 							
 							// Se il login ha successo mi aspetto che il client mi invii la porta dove ascolta il suo
 							// listener UDP, lo aggiungo ai Challengers (è come se fosse online)
-							int port = (int) Comunication.read(client);
+							int port = (int) Communication.read(client);
 							challengeableUsers.addChallenger(usr, port);
 							registeredUsers.getUser(usr).setOnlineState(true);
 							
@@ -99,7 +99,7 @@ public class RequestHandler implements Runnable {
 						challengeableUsers.removeChallenger(usr);
 						registeredUsers.getUser(usr).setOnlineState(false);
 						
-						Comunication.write(client,response);
+						Communication.write(client,response);
 		        		
 		        		client.close();
 		        		
@@ -109,22 +109,22 @@ public class RequestHandler implements Runnable {
 						
 						if (!registeredUsers.isRegistered(message)) {
 							response = new Response (StatusCodes.WRONGREQUEST);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 						}
 						else if (registeredUsers.getUser(usr).isFriend(message)){
 							response = new Response (StatusCodes.ALREADYFRIENDS);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 						}
 						else if (usr.equals(message)){
 							response = new Response (StatusCodes.SELFREQUEST);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 						}
 						else {
 							response = new Response (StatusCodes.OK);
 							registeredUsers.getUser(usr).addFriend(message);
 							registeredUsers.getUser(message).addFriend(usr);
 
-							Comunication.write(client,response);
+							Communication.write(client,response);
 							
 							registeredUsers.writeJson();
 						}
@@ -138,7 +138,7 @@ public class RequestHandler implements Runnable {
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode array = mapper.valueToTree(registeredUsers.getUser(usr).getFriendList());
 						
-						Comunication.write(client,array);
+						Communication.write(client,array);
 						
 						activeRequests.offer(client);
 						
@@ -146,7 +146,7 @@ public class RequestHandler implements Runnable {
 		        	
 					case SCORE:
 						
-						Comunication.write(client,registeredUsers.getUser(usr).getScore());
+						Communication.write(client,registeredUsers.getUser(usr).getScore());
 						
 						activeRequests.offer(client);
 					
@@ -156,7 +156,7 @@ public class RequestHandler implements Runnable {
 						
 						JsonNode rankingTable = ServerUtilities.getRanking(registeredUsers, usr);
 						
-						Comunication.write(client,rankingTable);
+						Communication.write(client,rankingTable);
 						
 						activeRequests.offer(client);
 		        	break;
@@ -165,23 +165,23 @@ public class RequestHandler implements Runnable {
 						
 						if (!registeredUsers.isRegistered(message)) {
 							response = new Response (StatusCodes.WRONGREQUEST);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 						}
 						else if (usr.equals(message)){
 							response = new Response (StatusCodes.SELFREQUEST);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 						}
 						else if (!registeredUsers.getUser(message).isFriend(usr)){
 							response = new Response (StatusCodes.NOTFRIENDS);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 						}	
 						else if (!registeredUsers.getUser(message).getOnlineState()) {
 							response = new Response (StatusCodes.USERNOTONLINE);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 						}
 						else if (!challengeableUsers.isChallengeable(message)) {
 							response = new Response (StatusCodes.USERINMATCH);
-							Comunication.write(client,response);
+							Communication.write(client,response);
 						}
 						else {
 							int usrPort = challengeableUsers.getChallengerPort(usr);
@@ -206,7 +206,7 @@ public class RequestHandler implements Runnable {
 
 				            if(GeneralUtilities.UDPToString(DpReceive).equals("y")) {
 								response = new Response (StatusCodes.MATCHSTARTING);
-								Comunication.write(client,response);
+								Communication.write(client,response);
 								
 								Match match = new Match(usr, usrPort, message, messagePort, selectedWords);
 								match.fetchTraductions();
@@ -223,13 +223,13 @@ public class RequestHandler implements Runnable {
 				            }
 				            else if (GeneralUtilities.UDPToString(DpReceive).equals("n")){
 								response = new Response (StatusCodes.MATCHDECLINED);
-								Comunication.write(client,response);
+								Communication.write(client,response);
 								challengeableUsers.addChallenger(usr, usrPort);
 								challengeableUsers.addChallenger(message, messagePort);
 				            }
 				            else {
 				            	response = new Response (StatusCodes.TIMEOUT);
-								Comunication.write(client,response);
+								Communication.write(client,response);
 								challengeableUsers.addChallenger(usr, usrPort);
 								challengeableUsers.addChallenger(message, messagePort);
 				            }
