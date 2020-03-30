@@ -68,7 +68,7 @@ public class WQClient {
 	                 + "\tR: Registrati come nuovo utente\n"
 	                 + "\tL: Effettua il login\n"
 	                 + "\tX: Chiudi\n");
-	        command = input.next();
+	        command = input.nextLine();
 	        
 	        switch (command) {
 	        
@@ -79,9 +79,9 @@ public class WQClient {
 		        case "r":
 		        	System.out.print("\n\t-----------------\n");
 		            System.out.print("\tNome utente: ");
-		            usr = input.next();
+		            usr = input.nextLine();
 		            System.out.print("\tPassword: ");
-		            pass = input.next();
+		            pass = input.nextLine();
 		            
 		    		try {
 		    			Registry r = LocateRegistry.getRegistry(serverRMIPort);
@@ -118,9 +118,9 @@ public class WQClient {
 		        case "l":
 		        	System.out.print("\n\t-----------------\n");
 		            System.out.print("\tNome utente: ");
-		            usr = input.next();
+		            usr = input.nextLine();
 		            System.out.print("\tPassword: ");
-		            pass = input.next();
+		            pass = input.nextLine();
 		            
 		            request = new Request(usr, pass, Operations.LOGIN ,null);
 		            
@@ -159,7 +159,7 @@ public class WQClient {
 			    		                 + "\tC: Vedi la classifica con i tuoi amici\n"
 			    		         		 + "\tX: Chiudi (ed effettua il logout) \n\t" );
 		        				}
-		        				command = input.next();
+		        				command = input.nextLine();
 		        				
 		        				switch (command) {
 		        				
@@ -202,7 +202,7 @@ public class WQClient {
 			        		        	System.out.print("\n\t-----------------\n");
 			        		        	
 			        		        	System.out.print("\tNome utente della persona che vuoi aggiungere come amico: ");
-			        		        	String friend = input.next();
+			        		        	String friend = input.nextLine();
 			        		        	request = new Request(usr, null, Operations.ADDFRIEND, friend);
 			        		        
 			        		        	try {
@@ -315,7 +315,7 @@ public class WQClient {
 			        		        	
 			        		        	System.out.print("\n\t-----------------\n");
 			        		        	System.out.print("\tNome utente dell'amico che vuoi sfidare: ");
-			        		        	String opponent = input.next();
+			        		        	String opponent = input.nextLine();
 			        		        	
 			        		        	request = new Request(usr, null, Operations.CHALLENGEFRIEND, opponent);
 			        		        
