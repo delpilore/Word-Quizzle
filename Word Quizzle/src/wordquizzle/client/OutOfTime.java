@@ -31,6 +31,8 @@ public class OutOfTime extends TimerTask {
 	    	catch(Exception e) {
 	    		e.printStackTrace();
 	    	}
+	    	
+	    	Listener.stopTimer();
     	}
     }
 }
