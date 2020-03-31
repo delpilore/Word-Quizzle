@@ -28,7 +28,6 @@ import wordquizzle.Communication;
 * WQCLIENT
 * 
 * WQClient è il programma client relativo al servizio Word Quizzle. 
-* 
 */
 
 public class WQClient {
@@ -64,7 +63,7 @@ public class WQClient {
 		
         while(on) {
         	
-	   		System.out.print("\nusage : COMMAND [ ARGS ... ]\n"
+	   		System.out.print("\nusage : Digita la lettera corrispondente al comando desiderato e premi invio!\n"
 	                 + "\tR: Registrati come nuovo utente\n"
 	                 + "\tL: Effettua il login\n"
 	                 + "\tX: Chiudi\n");
@@ -151,13 +150,12 @@ public class WQClient {
 		        				
 		        				if(!Listener.isInChallenge()) {
 				        			System.out.print("\nPannello di controllo di " + usr + ", sei attualmente loggato a Word Quizzle!\n");
-			        				System.out.print( "\n\tLo: Effettua il logout\n"
+			        				System.out.print( "\n\tLo: Effettua il logout (poi dal menù principale potrai chiudere il client)\n"
 			       		                 + "\tA: Aggiungi un amico\n"
 			    		                 + "\tLa: Vedi la tua lista amici\n"
 			    		                 + "\tS: Sfida un amico\n"
 			    		                 + "\tP: Vedi il tuo punteggio\n"
-			    		                 + "\tC: Vedi la classifica con i tuoi amici\n"
-			    		         		 + "\tX: Chiudi (ed effettua il logout) \n\t" );
+			    		                 + "\tC: Vedi la classifica con i tuoi amici\n");
 		        				}
 		        				command = input.nextLine();
 		        				
@@ -165,18 +163,9 @@ public class WQClient {
 		        				
 			        		        case "Lo":
 			        		        case "lo":
-			        		        case "X":
-			        		        case "x":
 			        		        	System.out.print("\n\t-----------------\n");
 			        		        	
-			        		        	if(command.equals("x") || command.equals("X")) {
-				        		        	System.out.print("\tChiudo ed effettuo il logout\n");
-				        		        	logged = false;
-				        		        	on = false;
-				        		        	Acceptor.interrupt();
-			        		        	}
-			        		        	else 
-			        		        		System.out.print("\tEffettuo il logout\n");
+			        		        	System.out.print("\tEffettuo il logout\n");
 			        		        	
 			        		            request = new Request(usr, null, Operations.LOGOUT, null);
 			        		        	
@@ -348,8 +337,10 @@ public class WQClient {
 												Listener.stopTimer();
 												
 												// CORRETTO QUI
-												if (command.equals("y"))
+												if (command.equals("y")) {
+													System.out.println("La partita sta per cominciare! Traduci più parole possibili in 60 secondi!");
 													Listener.setInChallenge(true);
+												}
 												
 					        	            	InetAddress ip = InetAddress.getLocalHost(); 
 					        		        
@@ -364,13 +355,16 @@ public class WQClient {
 				        		        	}
 			        		        	}
 			        		        	else
-			        		        		System.out.println("\tComando non riconosciuto\n");
+			        		        		System.out.println("\tComando non riconosciuto");
 			        				break;
 			        				
 			        				default:
 			        					if(Listener.isInChallenge()) {
 		        							request = new Request(usr, null, Operations.MATCH, command);
 		        							Communication.write(socket, request);	
+			        					}
+			        					else {
+			        						System.out.println("\tComando non riconosciuto");
 			        					}
 			        				break;
 		        				}
@@ -394,6 +388,10 @@ public class WQClient {
 		        	Acceptor.interrupt();
 		        	on = false;
 		        break;	
+		        
+		        default:
+		        	System.out.println("Comando non riconosciuto");
+		        break;
 	        }
         }
         input.close();    
