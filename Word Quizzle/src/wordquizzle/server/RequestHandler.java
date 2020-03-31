@@ -93,15 +93,20 @@ public class RequestHandler implements Runnable {
 		        	break;
 		        	
 					case LOGOUT:
-	
-						response = new Response (StatusCodes.OK);
-						// Tolgo anche l'occorrenza dalla tabella dei challengers
-						challengeableUsers.removeChallenger(usr);
-						registeredUsers.getUser(usr).setOnlineState(false);
-						
-						Communication.write(client,response);
-		        		
-		        		client.close();
+
+						if(challengeableUsers.isChallengeable(usr)) {
+							challengeableUsers.removeChallenger(usr);
+							registeredUsers.getUser(usr).setOnlineState(false);
+							
+							response = new Response (StatusCodes.OK);
+							Communication.write(client,response);
+							client.close();
+						}
+						else {
+							response = new Response (StatusCodes.CANTLOGOUT);
+							Communication.write(client,response);
+							activeRequests.offer(client);
+						}
 		        		
 		        	break;
 		        	
