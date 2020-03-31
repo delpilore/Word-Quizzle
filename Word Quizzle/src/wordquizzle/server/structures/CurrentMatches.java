@@ -1,6 +1,6 @@
 package wordquizzle.server.structures;
 
-import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 
 import wordquizzle.server.Match;
 
@@ -16,11 +16,11 @@ import wordquizzle.server.Match;
 
 public class CurrentMatches {
 
-	private Hashtable<String, Match> matches;
+	private ConcurrentHashMap<String, Match> matches;
 	
 	// Costruttore
 	public CurrentMatches() {
-		matches = new Hashtable<String, Match>();
+		matches = new ConcurrentHashMap<String, Match>();
 	}
 	
 	// addMatch(String usr, Match match)

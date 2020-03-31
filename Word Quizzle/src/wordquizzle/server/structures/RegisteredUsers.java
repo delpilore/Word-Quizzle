@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,14 +25,14 @@ import wordquizzle.server.User;
 
 public class RegisteredUsers {
 
-	private Hashtable<String, User> users; 
+	private ConcurrentHashMap<String, User> users; 
 	
 	private File json_file;
 	private ObjectMapper objectMapper;
 	
 	// Costruttore
 	public RegisteredUsers() {
-		users = new Hashtable<String, User>();
+		users = new ConcurrentHashMap<String, User>();
 		
 		// File Json su cui verrà salvato/recuperato lo stato della struttura degli utenti registrati
 		json_file = new File("RegisteredUserState.json");	
@@ -76,7 +76,7 @@ public class RegisteredUsers {
 				
 				if (br.readLine() != null) {
 					// Recupero tutta la tabella attraverso il file json_file 
-					users = objectMapper.readValue(json_file, new TypeReference<Hashtable<String,User>>(){});
+					users = objectMapper.readValue(json_file, new TypeReference<ConcurrentHashMap<String,User>>(){});
 					
 					// Setto a tutti lo stato offline (è normale che non sia consistente con la precedente esecuzione)
 					Set<String> keys = users.keySet();
