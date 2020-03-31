@@ -144,8 +144,8 @@ public class ChallengeListener implements Runnable {
 		return challenged;
 	}
 
-	public void setChallenged(Boolean challenged) {
-		this.challenged = challenged;
+	public void setChallenged(Boolean _challenged) {
+		this.challenged = _challenged;
 	}
 
 	public void setInChallenge(Boolean inChallenge) {
