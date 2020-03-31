@@ -1,6 +1,6 @@
 package wordquizzle.server.structures;
 
-import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
@@ -13,11 +13,11 @@ import java.util.Hashtable;
 
 public class ChallengeableUsers {
 	
-	private Hashtable<String, Integer> challengers;
+	private ConcurrentHashMap<String, Integer> challengers;
 	
 	// Costruttore
 	public ChallengeableUsers() {
-		challengers = new Hashtable<String, Integer>();
+		challengers = new ConcurrentHashMap<String, Integer>();
 	}
 	
 	// addChallenger(String _user, int _port)
