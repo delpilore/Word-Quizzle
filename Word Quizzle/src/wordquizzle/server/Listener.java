@@ -7,7 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
 /*
- * LISTENER (oggetto istanziato una sola volta in "WQServer" e dato come task ad un Thread)
+ * LISTENER 
  * 
  * Questa classe che implementa l'interfaccia Runnable, vuole rappresentare un classico task da "accettatore di connessioni" TCP.
  * Nell'economia di Word Quizzle sarà un solo Thread a prendere in carico questo task, avendo a disposizione l'accesso ad una 
@@ -38,9 +38,11 @@ public class Listener implements Runnable {
 				Socket client = server.accept();
 				System.out.println("Accettato client: " + client);
 				
+				// Per ogni socket accettata (relativa ad un client) setto il timeout di essa a 100ms.
+				// Lo faccio in modo che i worker non si blocchino sulle read in attesa di richieste dopo aver
+				// completato la prima richiesta di login.
 				client.setSoTimeout(100);
 				activeRequests.offer(client);
-
 			}
 		}
 		catch(Exception e) {

@@ -14,6 +14,15 @@ import wordquizzle.server.structures.RegisteredUsers;
 
 //AUTHOR: Lorenzo Del Prete, Corso B, 531417
 
+/*
+* SERVERUTILITIES
+* 
+* Questa classe contiene le implementazioni di metodi considerati d'utilità per il server.
+* In questo caso abbiamo due metodi: "getRanking" che si occupa di restituire un oggetto JsonNode
+* contentente la classica ORDINATA degli amici dell'utente passato per argomento (compreso anche lui)
+* e getWords() che si occupa di estrarre 5 parole da un file txt chiamato "dizionario.txt" da utilizzare
+* nel corso di una partita.
+*/
 
 public class ServerUtilities {
 	
@@ -56,12 +65,20 @@ public class ServerUtilities {
 		return rankingTable;
 	}
 	
-	
+	// getWords()
+	//
+	// Questo metodo si occupa di estrarre 5 parole da un file txt chiamato dizionario.txt e inserirle 
+	// in un ArrayList<String> da ritornare successivamente.
+	// Queste 5 parole saranno relative ad una sfida tra due utenti.
 	public static ArrayList<String> getWords() {
 		
 		File file = new File("dizionario.txt");
 		ArrayList<String> words = new ArrayList<String>() ;
 		
+		// Il metodo con cui vengono estratte queste 5 parole è un metodo randomico. (che cicla sul file finche non sono state trovate 5 parole)
+		// Passando in rassegna tutte le parole (una per linea), una in particolare viene presa solo quando
+		// una variabile random (rand), che può assumere valori in un range 0-80, assume il valore 40. 
+		// Quindi ogni parola ha 1/80 di probabilità di essere scelta. (nella relazione esploro la ridotta probabilità che questo metodo non ritorni 5 parole)
 		Random rand = new Random();
 		try {
 			Scanner sc = new Scanner(file,"UTF-8");
@@ -77,11 +94,8 @@ public class ServerUtilities {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		for (String a : words)
-			System.out.println(a);
 		
+		// Ritorno l'ArrayList<String> costruito sopra
 	    return words;
 	}
-	
 }

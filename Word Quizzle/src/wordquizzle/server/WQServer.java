@@ -22,7 +22,7 @@ import wordquizzle.server.structures.RegisteredUsers;
  * L'applicazione Word Quizzle è implementata secondo una architettura Client-Server.
  * Il core di quest'ultimo è proprio il seguente programma WQServer.
  * Si occupa di:
- *  - Istanziare un singolo oggetto "Structures", che sarà poi condiviso tra tutti i Thread del Server.
+ *  - Istanziare tutte le strutture necessarie al funzionamento del server (vedere i file contenuti in wordquizzle.server.structures)
  * 	- Esportare l'oggetto che realizzerà l'operazione di registrazione di un client (in RMI). 
  * 	- Avviare tutti i Thread necessari al funzionamento del Server (Listener e ThreadPool).
  */
@@ -31,11 +31,14 @@ public class WQServer {
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		RegisteredUsers registeredUsers = new RegisteredUsers();
-		ChallengeableUsers challengeableUsers = new ChallengeableUsers();
-		CurrentMatches currentMatches = new CurrentMatches();
-		LinkedBlockingQueue<Socket> activeRequests = new LinkedBlockingQueue<Socket>();
+		// Istanziazione di tutte le strutture necessarie al funzionamento del server (vedere i file relativi contenuti in wordquizzle.server.structures)
+		RegisteredUsers registeredUsers = new RegisteredUsers(); // Utenti registrati
+		ChallengeableUsers challengeableUsers = new ChallengeableUsers(); // Utenti sfidabili (online e non in partita o con richieste pendenti)
+		CurrentMatches currentMatches = new CurrentMatches(); // Partite in corso 
+		LinkedBlockingQueue<Socket> activeRequests = new LinkedBlockingQueue<Socket>(); // Coda di Socket condivisa tra Listener e Workers 
 		
+		// Riporto allo stato della precedente esecuzione del server (persistenza) l'oggetto registeredUsers.
+		// Recupero tutte le informazioni da un file Json (vedere "RegisteredUsers" per i dettagli implementativi)
 		registeredUsers.fetchPreviousState();
 		
 		// Rispettivamente: numero di thread worker attivati, porta associata al servizio registrazione in RMI, oggetto
@@ -61,16 +64,14 @@ public class WQServer {
 		// Istanzio la ThreadPool come una FixedThreadPool (numero di thread fissato)
 		ThreadPoolExecutor poolWorker = (ThreadPoolExecutor) Executors.newFixedThreadPool(NWORKERS);
 		
-		// Faccio partire un task Listener passandogli la BlockingQueue contenuta nell'oggetto Structures
-		// istanziato precedentemente.
+		// Faccio partire un task Listener passandogli la LinkedBlockingQueue istanziata precedentemente.
 		// Il Listener la utilizzerà per accodare le socket dei client accettati (vedere "Listener")
-		// che verranno poi gestiti dai Worker. (ricordiamo che l'unico oggetto Structures, è condiviso tra
-		// tutti i thread del server)
+		// che verranno poi gestiti dai Worker. 
 		Listener listener = new Listener(activeRequests);
 		Thread Welcome = new Thread(listener);
 		Welcome.start();
 		
-		// Faccio partire i Thread Worker che eseguiranno il task "RequestHandler"
+		// Faccio partire i Thread Worker che eseguiranno il task "RequestHandler" passando loro, inoltre, tutte le strutture istanziate inizialmente. 
 		for (int i=0; i<NWORKERS; i++)
 			poolWorker.execute(new RequestHandler(registeredUsers, challengeableUsers, currentMatches, activeRequests));		
 	}	

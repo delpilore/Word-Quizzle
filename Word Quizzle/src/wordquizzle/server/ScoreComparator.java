@@ -8,7 +8,7 @@ import java.util.Comparator;
 * SCORECOMPARATOR
 * 
 * Comparatore utilizzato per riordinare una collezione di User a seconda del loro punteggio su Word Quizzle
-* (utilizzato in "Utility")
+* (utilizzato in "ServerUtilities")
 */
 
 public class ScoreComparator implements Comparator<User> {

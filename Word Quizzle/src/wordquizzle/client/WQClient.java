@@ -200,32 +200,37 @@ public class WQClient {
 		        					//------------------------- LOGOUT -------------------------//
 			        		        case "Lo":
 			        		        case "lo":
-			        		        	System.out.print("\n\t-----------------\n");
-			        		        	
-			        		        	System.out.print("\tEffettuo il logout\n");
-			        		        	
-			        		        	// Istanzio una richiesta di LOGOUT 
-			        		        	// I campi null sono rispettivamente la password e l'eventuale dato aggiuntivo che il client deve comunicare al server (vedere "Request")
-			        		            request = new Request(usr, null, Operations.LOGOUT, null);
-			        		        	
-			        		        	try {
-			        		        		// Mando al server la richiesta e aspetto la risposta
-			        		        		Communication.write(socket,request);
-			        		        		response = (Response) Communication.read(socket);
-		
-			        		        		// Stampo lo statuscode e la reason phrase (vedere "StatusCodes")
-			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
-			        		        		
-			        		        		// Se lo statuscode è OK allora il logout è andato a buon fine e posso settare il flag logged a false.
-			        		        		// In questo modo esco dal ciclo e ritorno a quello principale del client (registrazione, login e chiudi)
-			        		        		if (response.getStatusCode() == StatusCodes.OK) 
-			        		        			logged = false;		
+			        		        	if (!Listener.isInChallenge() && !Listener.isChallenged()) {
+				        		        	System.out.print("\n\t-----------------\n");
+				        		        	
+				        		        	System.out.print("\tEffettuo il logout\n");
+				        		        	
+				        		        	// Istanzio una richiesta di LOGOUT 
+				        		        	// I campi null sono rispettivamente la password e l'eventuale dato aggiuntivo che il client deve comunicare al server (vedere "Request")
+				        		            request = new Request(usr, null, Operations.LOGOUT, null);
+				        		        	
+				        		        	try {
+				        		        		// Mando al server la richiesta e aspetto la risposta
+				        		        		Communication.write(socket,request);
+				        		        		response = (Response) Communication.read(socket);
+			
+				        		        		// Stampo lo statuscode e la reason phrase (vedere "StatusCodes")
+				        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
+				        		        		
+				        		        		// Se lo statuscode è OK allora il logout è andato a buon fine e posso settare il flag logged a false.
+				        		        		// In questo modo esco dal ciclo e ritorno a quello principale del client (registrazione, login e chiudi)
+				        		        		if (response.getStatusCode() == StatusCodes.OK) 
+				        		        			logged = false;		
+				        		        	}
+				        		        	catch(Exception e) {
+				        		        		e.printStackTrace();
+				        		        	}
+				        		        	
+				        		        	System.out.print("\t-----------------\n");
 			        		        	}
-			        		        	catch(Exception e) {
-			        		        		e.printStackTrace();
+			        		        	else {
+			        		        		System.out.println("Non puoi utilizzare questo comando mentre sei in partita o hai una richiesta pendente!");
 			        		        	}
-			        		        	
-			        		        	System.out.print("\t-----------------\n");
 			        		        break;
 			        		        
 			        		        
@@ -233,29 +238,34 @@ public class WQClient {
 			        		        //------------------------- AGGIUNGI AMICO -------------------------//
 			        		        case "A":
 			        		        case "a":
-			        		        	System.out.print("\n\t-----------------\n");
-			        		        	
-			        		        	System.out.print("\tNome utente della persona che vuoi aggiungere come amico: ");
-			        		        	String friend = input.nextLine();
-			        		        	
-			        		        	// Istanzio una richiesta di ADDFRIEND
-			        		        	// In questo caso nell'ultimo campo inserisco il nome dell'utente che voglio aggiungere come amico
-			        		        	request = new Request(usr, null, Operations.ADDFRIEND, friend);
-			        		        
-			        		        	try {
-			        		        		// Mando la richiesta e attendo una risposta
-			        		        		Communication.write(socket,request);
-			        		        		response = (Response) Communication.read(socket);
-			        		        		
-			        		        		// Stampo lo statuscode e la reason phrase (vedere "StatusCodes")
-			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
-			        		        		
+			        		        	if (!Listener.isInChallenge()) {
+				        		        	System.out.print("\n\t-----------------\n");
+				        		        	
+				        		        	System.out.print("\tNome utente della persona che vuoi aggiungere come amico: ");
+				        		        	String friend = input.nextLine();
+				        		        	
+				        		        	// Istanzio una richiesta di ADDFRIEND
+				        		        	// In questo caso nell'ultimo campo inserisco il nome dell'utente che voglio aggiungere come amico
+				        		        	request = new Request(usr, null, Operations.ADDFRIEND, friend);
+				        		        
+				        		        	try {
+				        		        		// Mando la richiesta e attendo una risposta
+				        		        		Communication.write(socket,request);
+				        		        		response = (Response) Communication.read(socket);
+				        		        		
+				        		        		// Stampo lo statuscode e la reason phrase (vedere "StatusCodes")
+				        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
+				        		        		
+				        		        	}
+				        		        	catch(Exception e) {
+				        		        		e.printStackTrace();
+				        		        	}
+				        		        	
+				        		        	System.out.print("\t-----------------\n");
 			        		        	}
-			        		        	catch(Exception e) {
-			        		        		e.printStackTrace();
+			        		        	else {
+			        		        		System.out.println("Non puoi utilizzare questo comando mentre sei in partita!");
 			        		        	}
-			        		        	
-			        		        	System.out.print("\t-----------------\n");
 			        		        break;
 			        		        
 			        		        
@@ -263,36 +273,41 @@ public class WQClient {
 			        		        //------------------------- OTTIENI LISTA AMICI -------------------------//
 			        		        case "La":
 			        		        case "la":
-			        		        	System.out.print("\n\t-----------------\n");
-			        		        	
-			        		        	// Istanzio una richiesta di FRIENDLIST
-			        		        	request = new Request(usr, null, Operations.FRIENDLIST, null);
-			        		        
-			        		        	try {
-			        		        		// Mando la richiesta ma questa volta non attendo una classica Response.
-			        		        		// Attendo invece un oggetto JsonNode (libreria jackson): la lista delle amicizie di usr
-			        		        		Communication.write(socket,request);
-				        		            JsonNode json = (JsonNode) Communication.read(socket);
-				        		            
-				        		            if (json.isEmpty()){
-				        		            	System.out.print("\tLa tua lista amici è vuota!\n");
-				        		            }
-				        		            else {
-			        		        			System.out.print("\tEcco la tua lista amici:\n");
-			        		        			// isArray() è un metodo messo a disposizione da jackson per "riconoscere" la struttura array in un oggetto Json
-			        		        			if (json.isArray()) {
-			        		        				// Infatti tratto l'oggetto come fosse un array, ciclando sopra di esso e stampando i valori contenuti
-			        		        			    for (final JsonNode objNode : json) {
-			        		        			        System.out.println("\t- " + objNode);
-			        		        			    }
-			        		        			}
-				        		            }
+			        		        	if (!Listener.isInChallenge()) {
+				        		        	System.out.print("\n\t-----------------\n");
+				        		        	
+				        		        	// Istanzio una richiesta di FRIENDLIST
+				        		        	request = new Request(usr, null, Operations.FRIENDLIST, null);
+				        		        
+				        		        	try {
+				        		        		// Mando la richiesta ma questa volta non attendo una classica Response.
+				        		        		// Attendo invece un oggetto JsonNode (libreria jackson): la lista delle amicizie di usr
+				        		        		Communication.write(socket,request);
+					        		            JsonNode json = (JsonNode) Communication.read(socket);
+					        		            
+					        		            if (json.isEmpty()){
+					        		            	System.out.print("\tLa tua lista amici è vuota!\n");
+					        		            }
+					        		            else {
+				        		        			System.out.print("\tEcco la tua lista amici:\n");
+				        		        			// isArray() è un metodo messo a disposizione da jackson per "riconoscere" la struttura array in un oggetto Json
+				        		        			if (json.isArray()) {
+				        		        				// Infatti tratto l'oggetto come fosse un array, ciclando sopra di esso e stampando i valori contenuti
+				        		        			    for (final JsonNode objNode : json) {
+				        		        			        System.out.println("\t- " + objNode);
+				        		        			    }
+				        		        			}
+					        		            }
+				        		        	}
+				        		        	catch(Exception e) {
+				        		        		e.printStackTrace();
+				        		        	}
+				        		        	
+				        		        	System.out.print("\t-----------------\n");
 			        		        	}
-			        		        	catch(Exception e) {
-			        		        		e.printStackTrace();
+			        		        	else {
+			        		        		System.out.println("Non puoi utilizzare questo comando mentre sei in partita!");
 			        		        	}
-			        		        	
-			        		        	System.out.print("\t-----------------\n");
 			        		        break;
 			        		        
 			        		        
@@ -300,24 +315,29 @@ public class WQClient {
 			        		        //------------------------- MOSTRA PUNTEGGIO -------------------------//
 			        		        case "P":
 			        		        case "p":	
-			        		        	System.out.print("\n\t-----------------\n");
-			        		        	
-			        		        	// Istanzio una richiesta di SCORE
-			        		        	request = new Request(usr, null, Operations.SCORE, null);
-			        		        
-			        		        	try {
-			        		        		// Mando la richiesta e anche questa volta non attendo una classica Response.
-			        		        		// Attendo invece un semplice int: il punteggio relativo all'utente usr
-			        		        		Communication.write(socket,request);
-			        		        		int score = (int) Communication.read(socket);
-			        		        		
-			        		        		System.out.print("\tIl tuo punteggio è: " + score + "\n");	
+			        		        	if (!Listener.isInChallenge()) {
+				        		        	System.out.print("\n\t-----------------\n");
+				        		        	
+				        		        	// Istanzio una richiesta di SCORE
+				        		        	request = new Request(usr, null, Operations.SCORE, null);
+				        		        
+				        		        	try {
+				        		        		// Mando la richiesta e anche questa volta non attendo una classica Response.
+				        		        		// Attendo invece un semplice int: il punteggio relativo all'utente usr
+				        		        		Communication.write(socket,request);
+				        		        		int score = (int) Communication.read(socket);
+				        		        		
+				        		        		System.out.print("\tIl tuo punteggio è: " + score + "\n");	
+				        		        	}
+				        		        	catch(Exception e) {
+				        		        		e.printStackTrace();
+				        		        	}
+				        		        	
+				        		        	System.out.print("\t-----------------\n");
 			        		        	}
-			        		        	catch(Exception e) {
-			        		        		e.printStackTrace();
+			        		        	else {
+			        		        		System.out.println("Non puoi utilizzare questo comando mentre sei in partita!");
 			        		        	}
-			        		        	
-			        		        	System.out.print("\t-----------------\n");
 			        		        break;
 			        		        
 			        		        
@@ -325,41 +345,46 @@ public class WQClient {
 			        		        //------------------------- MOSTRA CLASSIFICA -------------------------//
 			        		        case "C":
 			        		        case "c":
-			        		        	System.out.print("\n\t-----------------\n");
-			        		        	
-			        		        	// Istanzio una richiesta di RANKING
-			        		        	request = new Request(usr, null, Operations.RANKING, null);
-			        		        
-			        		        	try {
-			        		        		// Mando la richiesta al server e, per l'ultima volta, non mi aspetto una classica Response.
-			        		        		// Mi aspetto, come nel caso dell'operazione "OTTIENI LISTA AMICI", un oggetto JsonNode (jackson): la classifica già ordinata.
-			        		        		Communication.write(socket,request);
-				        		            JsonNode json = (JsonNode) Communication.read(socket);
-				        		            
-				        		            if (json.isEmpty()){
-				        		            	System.out.print("\tLa tua lista amici è vuota!\n");
-				        		            }
-				        		            else {
-				        		            	// L'oggetto Json sarà composto da diversi campi (nomi utente) e diversi valori associati (punteggio)
-				        		            	// Queste coppie arrivano già ordinate in modo decrescente a seconda del punteggio.	
-				        		            	// Itero su di esse e stampo, per ognuna, il campo seguito dal valore associato
-				        		            	System.out.print("\tEcco la tua classifica con i tuoi amici:\n");
-				        		            	Iterator<String> fieldNames = json.fieldNames();
-
-				        		            	while(fieldNames.hasNext()) {
-				        		            	    String fieldName = fieldNames.next();
-				        		            	    // Qui recupero il valore associato ad un campo (si ricorda che il campo è il nome utente e il valore è il suo punteggio)
-				        		            	    JsonNode field = json.get(fieldName);
-				        		            	    // Stampo ogni coppia nella forma campo: valore
-				        		            	    System.out.println("\t" + fieldName + ": " + field.asInt());
-				        		            	}
-				        		            }
+			        		        	if (!Listener.isInChallenge()) {
+				        		        	System.out.print("\n\t-----------------\n");
+				        		        	
+				        		        	// Istanzio una richiesta di RANKING
+				        		        	request = new Request(usr, null, Operations.RANKING, null);
+				        		        
+				        		        	try {
+				        		        		// Mando la richiesta al server e, per l'ultima volta, non mi aspetto una classica Response.
+				        		        		// Mi aspetto, come nel caso dell'operazione "OTTIENI LISTA AMICI", un oggetto JsonNode (jackson): la classifica già ordinata.
+				        		        		Communication.write(socket,request);
+					        		            JsonNode json = (JsonNode) Communication.read(socket);
+					        		            
+					        		            if (json.isEmpty()){
+					        		            	System.out.print("\tLa tua lista amici è vuota!\n");
+					        		            }
+					        		            else {
+					        		            	// L'oggetto Json sarà composto da diversi campi (nomi utente) e diversi valori associati (punteggio)
+					        		            	// Queste coppie arrivano già ordinate in modo decrescente a seconda del punteggio.	
+					        		            	// Itero su di esse e stampo, per ognuna, il campo seguito dal valore associato
+					        		            	System.out.print("\tEcco la tua classifica con i tuoi amici:\n");
+					        		            	Iterator<String> fieldNames = json.fieldNames();
+	
+					        		            	while(fieldNames.hasNext()) {
+					        		            	    String fieldName = fieldNames.next();
+					        		            	    // Qui recupero il valore associato ad un campo (si ricorda che il campo è il nome utente e il valore è il suo punteggio)
+					        		            	    JsonNode field = json.get(fieldName);
+					        		            	    // Stampo ogni coppia nella forma campo: valore
+					        		            	    System.out.println("\t" + fieldName + ": " + field.asInt());
+					        		            	}
+					        		            }
+				        		        	}
+				        		        	catch(Exception e) {
+				        		        		e.printStackTrace();
+				        		        	}
+				        		        	
+				        		        	System.out.print("\t-----------------\n");
 			        		        	}
-			        		        	catch(Exception e) {
-			        		        		e.printStackTrace();
+			        		        	else {
+			        		        		System.out.println("Non puoi utilizzare questo comando mentre sei in partita!");
 			        		        	}
-			        		        	
-			        		        	System.out.print("\t-----------------\n");
 			        		        break;
 			        		        
 			        		        
@@ -367,38 +392,43 @@ public class WQClient {
 			        		        //------------------------- SFIDA UTENTE -------------------------//
 			        		        case "S":
 			        		        case "s":
-			        		        	System.out.print("\n\t-----------------\n");
-			        		        	
-			        		        	System.out.print("\tNome utente dell'amico che vuoi sfidare: ");
-			        		        	String opponent = input.nextLine();
-			        		        	
-			        		        	// Istanzio una richiesta CHALLENGEFRIEND 
-			        		        	// L'ultimo campo della richiesta viene sfruttato per inviare al server il nome dello sfidante richiesto
-			        		        	request = new Request(usr, null, Operations.CHALLENGEFRIEND, opponent);
-			        		        
-			        		        	try {
-			        		        		// Mando la richiesta e attendo una risposta Response
-			        		        		Communication.write(socket,request);
-			        		        		response = (Response) Communication.read(socket);
-		
-			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
-			        		        		
-			        		        		// Se lo statuscode della Response equivale a MATCHSTARTING, la partita può ufficialmente iniziare.
-			        		        		// Questo significa che lo sfidante ha accettato la richiesta di sfida inviata in TCP al server, che ha provveduto ad
-			        		        		// inoltrarla in UDP al thread Acceptor dello sfidante. (che poi ha risposto "y", vedremo al case successivo cosa significa)
-			        		        		if (response.getStatusCode()==StatusCodes.MATCHSTARTING) {
-			        		        			// Setto il flag inChallenge dell'Acceptor di questo client a true, in modo che cambi il suo comportamento in fase di ascolto 
-			        		        			// di datagrammi UDP: visto che siamo in partita, non dovrà più ascoltare richieste di sfida ma le parole da tradurre e infine
-			        		        			// il risultato del match.
-			        		        			Listener.setInChallenge(true);
-			        		        			System.out.println("\tNel corso del match potrai continuare ad eseguire la maggior parte dei comandi");
-			        		        		}
+			        		        	if (!Listener.isInChallenge()) {
+				        		        	System.out.print("\n\t-----------------\n");
+				        		        	
+				        		        	System.out.print("\tNome utente dell'amico che vuoi sfidare: ");
+				        		        	String opponent = input.nextLine();
+				        		        	
+				        		        	// Istanzio una richiesta CHALLENGEFRIEND 
+				        		        	// L'ultimo campo della richiesta viene sfruttato per inviare al server il nome dello sfidante richiesto
+				        		        	request = new Request(usr, null, Operations.CHALLENGEFRIEND, opponent);
+				        		        
+				        		        	try {
+				        		        		// Mando la richiesta e attendo una risposta Response
+				        		        		Communication.write(socket,request);
+				        		        		response = (Response) Communication.read(socket);
+			
+				        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
+				        		        		
+				        		        		// Se lo statuscode della Response equivale a MATCHSTARTING, la partita può ufficialmente iniziare.
+				        		        		// Questo significa che lo sfidante ha accettato la richiesta di sfida inviata in TCP al server, che ha provveduto ad
+				        		        		// inoltrarla in UDP al thread Acceptor dello sfidante. (che poi ha risposto "y", vedremo al case successivo cosa significa)
+				        		        		if (response.getStatusCode()==StatusCodes.MATCHSTARTING) {
+				        		        			// Setto il flag inChallenge dell'Acceptor di questo client a true, in modo che cambi il suo comportamento in fase di ascolto 
+				        		        			// di datagrammi UDP: visto che siamo in partita, non dovrà più ascoltare richieste di sfida ma le parole da tradurre e infine
+				        		        			// il risultato del match.
+				        		        			Listener.setInChallenge(true);
+				        		        			System.out.println("\tNel corso del match non potrai utilizzare nessun comando");
+				        		        		}
+				        		        	}
+				        		        	catch(Exception e) {
+				        		        		e.printStackTrace();
+				        		        	}
+				        		        	
+				        		        	System.out.print("\t-----------------\n"); 	
 			        		        	}
-			        		        	catch(Exception e) {
-			        		        		e.printStackTrace();
+			        		        	else {
+			        		        		System.out.println("Non puoi utilizzare questo comando mentre sei in partita!");
 			        		        	}
-			        		        	
-			        		        	System.out.print("\t-----------------\n"); 	
 			        		        break;
 			        		        
 			        		        // I prossimi due case sono attivi solo in particolari casi (altrimenti danno "Comando non riconosciuto")
@@ -426,7 +456,7 @@ public class WQClient {
 												if (command.equals("y")) {
 													System.out.println("La partita sta per cominciare! Traduci più parole possibili in 60 secondi!");
 													Listener.setInChallenge(true);
-													System.out.println("Nel corso del match potrai continuare ad eseguire la maggior parte dei comandi");
+													System.out.println("\tNel corso del match non potrai utilizzare nessun comando");
 												}
 												
 												// In ogni caso mando la risposta alla richiesta ("y" o "n" che sia) al Server in UDP.

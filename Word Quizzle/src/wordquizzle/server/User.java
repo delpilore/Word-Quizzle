@@ -105,5 +105,4 @@ public class User {
 	public void updateScore(int _matchscore) {
 		score = score + _matchscore;
 	}
-
 }

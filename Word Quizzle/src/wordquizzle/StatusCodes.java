@@ -22,8 +22,7 @@ public enum StatusCodes {
 	MATCHDECLINED("La sfida è stata declinata!\n"),
 	SELFREQUEST("Non puoi mandare una richiesta a te stesso!\n"),
 	TIMEOUT("L'avversario non ha fatto in tempo ad accettare la tua richiesta di sfida!\n"),
-	USERALREADYONLINE("Sei già loggato!\n"),
-	CANTLOGOUT("Non puoi effettuare il logout mentre sei in parita o hai una richiesta pendente!\n");
+	USERALREADYONLINE("Sei già loggato!\n");
 
     public final String label;
     
