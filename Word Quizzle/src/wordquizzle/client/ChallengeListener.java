@@ -100,7 +100,7 @@ public class ChallengeListener implements Runnable {
 	            	if(!str.equals("FINE"))
 	            		System.out.println("\nEcco la parola: " + str);
 	            	else {
-	            		System.out.println("\nPARITA FINITA!");
+	            		System.out.println("\nPARITA FINITA! Recupero risultato dell'altro giocatore... (potrebbe star ancora giocando)");
 	            		setInChallenge(false);
 	            		
 	            		// Tolgo il timeout dalla socket chiamando setSoTimeout(0), perché in questo caso la read si deve bloccare
