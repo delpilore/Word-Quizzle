@@ -315,8 +315,10 @@ public class WQClient {
 			        		        		response = (Response) Communication.read(socket);
 		
 			        		        		System.out.print("\t" + response.getStatusCode() + ": " + response.getStatusCode().label);
-			        		        		if (response.getStatusCode()==StatusCodes.MATCHSTARTING)
+			        		        		if (response.getStatusCode()==StatusCodes.MATCHSTARTING) {
 			        		        			Listener.setInChallenge(true);
+			        		        			System.out.println("\tNel corso del match potrai continuare ad eseguire la maggior parte dei comandi");
+			        		        		}
 			        		        		
 			        		        	}
 			        		        	catch(Exception e) {
@@ -340,6 +342,7 @@ public class WQClient {
 												if (command.equals("y")) {
 													System.out.println("La partita sta per cominciare! Traduci più parole possibili in 60 secondi!");
 													Listener.setInChallenge(true);
+													System.out.println("Nel corso del match potrai continuare ad eseguire la maggior parte dei comandi");
 												}
 												
 					        	            	InetAddress ip = InetAddress.getLocalHost(); 
