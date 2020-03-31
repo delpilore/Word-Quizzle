@@ -115,6 +115,12 @@ public class ChallengeListener implements Runnable {
 	    	            
 	    	            System.out.println(str2);
 	    	            System.out.println("Puoi tornare alle tue classiche operazioni!");
+        				System.out.print( "\n\tLo: Effettua il logout (poi dal menù principale potrai chiudere)\n"
+	       		                 + "\tA: Aggiungi un amico\n"
+	    		                 + "\tLa: Vedi la tua lista amici\n"
+	    		                 + "\tS: Sfida un amico\n"
+	    		                 + "\tP: Vedi il tuo punteggio\n"
+	    		                 + "\tC: Vedi la classifica con i tuoi amici\n");
 	            	}
 	            }
 	        }
