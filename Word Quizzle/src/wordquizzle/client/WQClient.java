@@ -454,9 +454,11 @@ public class WQClient {
 												// che cambi il suo comportamento in fase di ascolto di datagrammi UDP: visto che siamo in partita, 
 												// non dovrà più ascoltare richieste di sfida ma le parole da tradurre e infineil risultato del match.
 												if (command.equals("y")) {
-													System.out.println("La partita sta per cominciare! Traduci più parole possibili in 60 secondi!");
 													Listener.setInChallenge(true);
+													System.out.print("\n\t-----------------\n");
+													System.out.println("\tMATCHSTARTING: La partita sta per cominciare! Traduci più parole possibili in 60 secondi!");
 													System.out.println("\tNel corso del match non potrai utilizzare nessun comando");
+													System.out.print("\t-----------------\n"); 	
 												}
 												
 												// In ogni caso mando la risposta alla richiesta ("y" o "n" che sia) al Server in UDP.
